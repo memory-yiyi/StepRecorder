@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34322.80
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StepRecorder", "StepRecorder\StepRecorder.csproj", "{30611C43-7616-469E-A9F3-767B12BD306C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "File", "File", "{AC2D34F4-69F2-4B45-B418-535450153B24}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30611C43-7616-469E-A9F3-767B12BD306C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30611C43-7616-469E-A9F3-767B12BD306C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30611C43-7616-469E-A9F3-767B12BD306C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30611C43-7616-469E-A9F3-767B12BD306C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DB539B79-920B-46CF-A44E-6599603AE075}
+	EndGlobalSection
+EndGlobal
