@@ -1,0 +1,20 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- 程序主界面 -->
+    <s:String x:Key="S.Main.Title">Step Recorder - Plus Max Pro</s:String>
+    <s:String x:Key="S.Main.Recorder">记录器</s:String>
+    <s:String x:Key="S.Main.Editor">编辑器</s:String>
+    <s:String x:Key="S.Main.Settings">设置</s:String>
+    
+    <!-- 记录器 -->
+    <s:String x:Key="S.Recorder.Record">录制</s:String>
+    <s:String x:Key="S.Recorder.Pause">暂停</s:String>
+    <s:String x:Key="S.Recorder.Note">注释</s:String>
+    <s:String x:Key="S.Recorder.Stop">停止</s:String>
+    
+    <!-- 设置 -->
+    <s:String x:Key="S.Settings.Title">Step Recorder - 设置</s:String>
+    
+</ResourceDictionary>
