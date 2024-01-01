@@ -29,6 +29,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StepRecorder.Core\StepRecorder.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

@@ -1,6 +1,6 @@
-﻿using StepRecorder.Components.Record;
+﻿using StepRecorder.Core.Components.Record;
 
-namespace StepRecorder.Components
+namespace StepRecorder.Core.Components
 {
     /// <summary>
     /// 记录器的状态类，维护记录器当前运行状态
@@ -11,7 +11,33 @@ namespace StepRecorder.Components
 
         public RecordState() => currentState = new Stop();
 
-        public void ChangeCurrentState(bool? stopSign) => this.currentState.ChangeState(this, stopSign);
+        /// <summary>
+        /// 切换当前状态为指定状态
+        /// </summary>
+        /// <param name="nextState">将要切换到的状态</param>
+        public void ChangeCurrentState(string nextState)
+        {
+            if (nextState != GetCurrentState())
+            {
+                switch (nextState)
+                {
+                    case "Record":
+                        // 根据推算，下面两个都可以，任选其一便可
+                        currentState.ChangeState(this, false);
+                        // recordState.ChangeCurrentState(this, null);
+                        break;
+                    case "Pause":
+                        currentState.ChangeState(this, false);
+                        break;
+                    case "Note":
+                        currentState.ChangeState(this, null);
+                        break;
+                    case "Stop":
+                        currentState.ChangeState(this, true);
+                        break;
+                }
+            }
+        }
 
         public string GetCurrentState() => currentState.GetType().Name;
 
@@ -32,7 +58,7 @@ namespace StepRecorder.Components
                 if (stopSign == null)
                 {   // 切换到Note
                     recordState.SetCurrentState(new Note());
-                    recordState.ChangeCurrentState(false);
+                    recordState.ChangeCurrentState("Record");
                 }   // 完成后自动跳转到Record
                 else if (stopSign == false)
                 {   // 切换到Pause
@@ -41,7 +67,7 @@ namespace StepRecorder.Components
                 else
                 {   // 切换到Stop
                     recordState.SetCurrentState(new Stop());
-                    recordState.ChangeCurrentState(true);
+                    recordState.ChangeCurrentState("Stop");
                 }   // 完成后自动跳转到End
             }
         }
@@ -53,7 +79,7 @@ namespace StepRecorder.Components
                 if (stopSign == true)
                 {   // 切换到Stop
                     recordState.SetCurrentState(new Stop());
-                    recordState.ChangeCurrentState(true);
+                    recordState.ChangeCurrentState("Stop");
                 }   // 完成后自动跳转到End
                 else
                 {   // 切换到Record

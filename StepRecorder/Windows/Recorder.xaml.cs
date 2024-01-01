@@ -1,4 +1,4 @@
-﻿using StepRecorder.Components;
+﻿using StepRecorder.Core.Components;
 using System.Windows;
 
 namespace StepRecorder.Windows
@@ -51,27 +51,26 @@ namespace StepRecorder.Windows
         {
             if (e.Source is FrameworkElement source)
             {
-                switch (source.Name)
+                string nextState = source.Name;
+                switch (nextState)
                 {
                     case "Record":
                         SetButtonEnable(false, true, true, true);
-                        // 根据推算，下面两个都可以，任选其一便可
-                        recordState.ChangeCurrentState(false);
-                        // recordState.ChangeCurrentState(null);
                         break;
                     case "Pause":
                         SetButtonEnable(true, false, false, true);
-                        recordState.ChangeCurrentState(false);
                         break;
                     case "Note":
                         SetButtonEnable(false, false, false, false);
-                        recordState.ChangeCurrentState(null);
-                        SetButtonEnable(false, true, true, true);
                         break;
                     case "Stop":
                         SetButtonEnable(false, false, false, false);
-                        recordState.ChangeCurrentState(true);
                         break;
+                }
+                recordState.ChangeCurrentState(nextState);
+                if (nextState == "Note")
+                {
+                    SetButtonEnable(false, true, true, true);
                 }
             }
         }
