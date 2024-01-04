@@ -33,7 +33,13 @@ namespace StepRecorder.Windows
         }
         #endregion
 
-        private RecordState recordState;
+        #region 区域绘制模块
+        
+
+        #endregion
+
+        #region 录制模块
+        private readonly RecordState recordState;
 
         private void SetButtonEnable(bool record, bool pause, bool note, bool stop)
         {
@@ -42,7 +48,6 @@ namespace StepRecorder.Windows
             Note.IsEnabled = note;
             Stop.IsEnabled = stop;
         }
-
 
         /// <summary>
         /// 录制入口函数
@@ -55,6 +60,7 @@ namespace StepRecorder.Windows
                 switch (nextState)
                 {
                     case "Record":
+                        if (DrawArea.IsEnabled) DrawArea.IsEnabled = false;
                         SetButtonEnable(false, true, true, true);
                         break;
                     case "Pause":
@@ -72,7 +78,9 @@ namespace StepRecorder.Windows
                 {
                     SetButtonEnable(false, true, true, true);
                 }
+                e.Handled = true;
             }
         }
+        #endregion
     }
 }

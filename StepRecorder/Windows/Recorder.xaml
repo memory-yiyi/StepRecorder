@@ -3,15 +3,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:StepRecorder.Windows"
         mc:Ignorable="d"
-        Title="Recorder" Height="50" Width="500"
+        Title="Recorder" Height="50" Width="350"
         WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
-    <UniformGrid Columns="5" ButtonBase.Click="RecordEntry">
-        <ListBox d:ItemsSource="{d:SampleData ItemCount=3}"/>
-        <Button Name="Record" Content="{DynamicResource S.Recorder.Record}"/>
-        <Button Name="Pause" Content="{DynamicResource S.Recorder.Pause}" IsEnabled="False"/>
-        <Button Name="Note" Content="{DynamicResource S.Recorder.Note}" IsEnabled="False"/>
-        <Button Name="Stop" Content="{DynamicResource S.Recorder.Stop}" IsEnabled="False"/>
-    </UniformGrid>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <UniformGrid Name="DrawArea" Columns="3">
+            <Button Content="{DynamicResource S.Recorder.Area}"/>
+            <Button Content="{DynamicResource S.Recorder.Window}"/>
+            <Button Content="{DynamicResource S.Recorder.Screen}"/>
+        </UniformGrid>
+        <UniformGrid Grid.Column="1"
+            Columns="4" ButtonBase.Click="RecordEntry">
+            <Button Name="Record" Content="{DynamicResource S.Recorder.Record}"/>
+            <Button Name="Pause" Content="{DynamicResource S.Recorder.Pause}" IsEnabled="False"/>
+            <Button Name="Note" Content="{DynamicResource S.Recorder.Note}" IsEnabled="False"/>
+            <Button Name="Stop" Content="{DynamicResource S.Recorder.Stop}" IsEnabled="False"/>
+        </UniformGrid>
+    </Grid>
 </Window>
