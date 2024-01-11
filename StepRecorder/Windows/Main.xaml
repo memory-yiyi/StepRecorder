@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ViewModel="clr-namespace:StepRecorder.ViewModel" x:Class="StepRecorder.Windows.Main"
         mc:Ignorable="d"
-        Title="{DynamicResource S.Main.Title}" Height="80" Width="500"
+        Title="{DynamicResource S.Main.Title}" Height="{StaticResource D.Main.Height}" Width="{StaticResource D.Main.Width}"
         ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
     <Window.DataContext>
         <ViewModel:ApplicationViewModel/>

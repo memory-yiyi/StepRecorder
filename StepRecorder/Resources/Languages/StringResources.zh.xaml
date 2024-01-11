@@ -9,9 +9,7 @@
     <s:String x:Key="S.Main.Settings">设置</s:String>
     
     <!-- 记录器 -->
-    <s:String x:Key="S.Recorder.Area">区域</s:String>
-    <s:String x:Key="S.Recorder.Window">窗口</s:String>
-    <s:String x:Key="S.Recorder.Screen">全屏</s:String>
+    <s:String x:Key="S.Recorder.DrawArea.FullScreen">全屏（默认）</s:String>
     <s:String x:Key="S.Recorder.Record">录制</s:String>
     <s:String x:Key="S.Recorder.Pause">暂停</s:String>
     <s:String x:Key="S.Recorder.Note">注释</s:String>

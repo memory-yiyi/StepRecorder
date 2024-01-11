@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         Title="{DynamicResource S.Settings.Title}" Height="450" Width="800"
         ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner"
-        Closed="Settings_Closed">
+        Closed="Window_Closed">
     <Grid>
         
     </Grid>

@@ -4,18 +4,24 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Recorder" Height="50" Width="350"
-        WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+        Title="Recorder" Height="20" Width="350"
+        WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Topmost="True"
+        KeyDown="Window_KeyDown" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <UniformGrid Name="DrawArea" Columns="3">
-            <Button Content="{DynamicResource S.Recorder.Area}"/>
-            <Button Content="{DynamicResource S.Recorder.Window}"/>
-            <Button Content="{DynamicResource S.Recorder.Screen}"/>
-        </UniformGrid>
+        <ComboBox Name="DrawArea" SelectedIndex="0" SelectionChanged="DrawArea_SelectionChanged">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Path=Description}"/>
+                        <TextBlock Text="{Binding Path=Name}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
         <UniformGrid Grid.Column="1"
             Columns="4" ButtonBase.Click="RecordEntry">
             <Button Name="Record" Content="{DynamicResource S.Recorder.Record}"/>

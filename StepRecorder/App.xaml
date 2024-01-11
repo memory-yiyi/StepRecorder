@@ -1,6 +1,7 @@
 ﻿<Application x:Class="StepRecorder.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:System;assembly=mscorlib"
              xmlns:viewModel="clr-namespace:StepRecorder.ViewModel"
              StartupUri="/Windows/Main.xaml">
     <Application.Resources>
@@ -12,6 +13,10 @@
 
             <!--<viewModel:ApplicationViewModel x:Key="AppViewModel"/>-->
 
+            <!-- 主窗体宽度与高度 -->
+            <s:Double x:Key="D.Main.Height">80</s:Double>
+            <s:Double x:Key="D.Main.Width">500</s:Double>
+            
         </ResourceDictionary>
     </Application.Resources>
 </Application>
