@@ -8,6 +8,6 @@
         Title="RegionSelection" WindowStyle="None" AllowsTransparency="True" Topmost="True"
         BorderBrush="#CCEE0000" BorderThickness="3"
         UseLayoutRounding="True" SnapsToDevicePixels="True" Background="{x:Null}" ShowInTaskbar="False"
-        Closed="Window_Closed">
+        Loaded="Window_Loaded" Closed="Window_Closed">
 
 </Window>

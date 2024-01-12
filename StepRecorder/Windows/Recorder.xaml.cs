@@ -34,6 +34,12 @@ namespace StepRecorder.Windows
             recordState = new RecordState();
             InitializeComponent();
             DrawArea.ItemsSource = areaList.AreaInfos;
+            this.ShowInTaskbar = false;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            instance = null;
         }
         #endregion
 
@@ -79,7 +85,14 @@ namespace StepRecorder.Windows
             else
             {
                 this.Left = regionWindow.Right - regionWindow.Width * 0.125 - this.Width;
-                this.Top = regionWindow.Top + 3;
+                if (regionWindow.Top < currentScreen.Top || regionWindow.Top > currentScreen.Bottom - reservedSpace)
+                {
+                    this.Top = currentScreen.Top + 3;
+                }
+                else
+                {
+                    this.Top = regionWindow.Top + 3;
+                }
             }
 
             this.Show();
@@ -147,12 +160,8 @@ namespace StepRecorder.Windows
                 Owner.Show();
                 this.Close();
                 regionWindow?.Close();
+                e.Handled = true;
             }
-        }
-
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            instance = null;
-        }
+        } 
     }
 }
