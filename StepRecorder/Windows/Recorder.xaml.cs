@@ -40,6 +40,7 @@ namespace StepRecorder.Windows
         private void Window_Closed(object sender, EventArgs e)
         {
             instance = null;
+            GC.Collect();
         }
         #endregion
 

@@ -1,4 +1,4 @@
-﻿using StepRecorder.Core.Components.Record;
+﻿using StepRecorder.Core.Components.RecordTools;
 
 namespace StepRecorder.Core.Components
 {
@@ -7,6 +7,7 @@ namespace StepRecorder.Core.Components
     /// </summary>
     public class RecordState
     {
+        #region 状态控制
         private State currentState;
 
         public RecordState() => currentState = new Stop();
@@ -17,7 +18,7 @@ namespace StepRecorder.Core.Components
         /// <param name="nextState">将要切换到的状态</param>
         public void ChangeCurrentState(string nextState)
         {
-            if (nextState != GetCurrentState())
+            if (nextState != GetCurrentState() || nextState == "Stop")
             {
                 switch (nextState)
                 {
@@ -40,74 +41,11 @@ namespace StepRecorder.Core.Components
         }
 
         public string GetCurrentState() => currentState.GetType().Name;
+        internal void SetCurrentState(State state) => currentState = state;
+        #endregion
 
-        public void SetCurrentState(State state) => currentState = state;
-    }
-
-    namespace Record
-    {
-        public abstract class State
-        {
-            public abstract void ChangeState(RecordState recordState, bool? stopSign);
-        }
-
-        internal class Record : State
-        {
-            public override void ChangeState(RecordState recordState, bool? stopSign)
-            {
-                if (stopSign == null)
-                {   // 切换到Note
-                    recordState.SetCurrentState(new Note());
-                    recordState.ChangeCurrentState("Record");
-                }   // 完成后自动跳转到Record
-                else if (stopSign == false)
-                {   // 切换到Pause
-                    recordState.SetCurrentState(new Pause());
-                }
-                else
-                {   // 切换到Stop
-                    recordState.SetCurrentState(new Stop());
-                    recordState.ChangeCurrentState("Stop");
-                }   // 完成后自动跳转到End
-            }
-        }
-
-        internal class Pause : State
-        {
-            public override void ChangeState(RecordState recordState, bool? stopSign)
-            {
-                if (stopSign == true)
-                {   // 切换到Stop
-                    recordState.SetCurrentState(new Stop());
-                    recordState.ChangeCurrentState("Stop");
-                }   // 完成后自动跳转到End
-                else
-                {   // 切换到Record
-                    recordState.SetCurrentState(new Record());
-                }
-            }
-        }
-
-        internal class Note : State
-        {
-            public override void ChangeState(RecordState recordState, bool? stopSign)
-            {   // 切换到Record
-                recordState.SetCurrentState(new Record());
-            }
-        }
-
-        internal class Stop : State
-        {
-            public override void ChangeState(RecordState recordState, bool? stopSign)
-            {
-                if (stopSign == true)
-                {   // End，录制结束
-                }
-                else
-                {   // 切换到Record
-                    recordState.SetCurrentState(new Record());
-                }
-            }
-        }
+        #region 工具
+        internal Hook MKbHook { get; set; } = new();
+        #endregion
     }
 }

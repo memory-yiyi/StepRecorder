@@ -3,6 +3,9 @@ using System.Windows;
 
 namespace StepRecorder.Core.Components
 {
+    /// <summary>
+    /// 前台进程信息列表
+    /// </summary>
     public class AreaList
     {
         public AreaList() => GetAreaList();
