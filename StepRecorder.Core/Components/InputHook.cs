@@ -1,6 +1,5 @@
 ﻿using StepRecorder.Core.Events;
 using System.Runtime.InteropServices;
-using System.Windows;
 using System.Windows.Input;
 
 namespace StepRecorder.Core.Components
@@ -11,11 +10,12 @@ namespace StepRecorder.Core.Components
     public class InputHook
     {
         #region Windows SDKs -> WinUser.h
-        private const int WH_KEYBOARD_LL = 13;
         private const int WH_MOUSE_LL = 14;
 
-        //private const int WM_KEYDOWN = 0x0100;
-        //private const int WM_SYSKEYDOWN = 0x0104;
+
+        private const int WH_KEYBOARD_LL = 13;
+        private const int WM_KEYDOWN = 0x0100;
+        private const int WM_SYSKEYDOWN = 0x0104;
         private const int WM_KEYUP = 0x0101;
         private const int WM_SYSKEYUP = 0x0105;
 
@@ -43,8 +43,6 @@ namespace StepRecorder.Core.Components
         private static extern int UnhookWindowsHookEx(int hhk);
         [DllImport("user32.dll")]
         private static extern IntPtr CallNextHookEx(int hhk, int nCode, uint wParam, IntPtr lParam);
-        [DllImport("user32.dll")]
-        private static extern short GetKeyState(int nVirtKey);
         #endregion
 
         #region 构建方法
@@ -108,6 +106,7 @@ namespace StepRecorder.Core.Components
         private int keyboardHookHandle = 0;
 
         private bool isComboKey = false;
+        private object comboKeyLock = new();
         private readonly HashSet<int> keys = [];
         #endregion
 
@@ -161,58 +160,83 @@ namespace StepRecorder.Core.Components
             bool handled = false;
             bool findComboKey = false;
             KBDLLHOOK keyboard = (KBDLLHOOK)Marshal.PtrToStructure(lParam, typeof(KBDLLHOOK))!;
-            // 判断是否按下了组合键
-            foreach (var vk in Enum.GetValues<VKCombo>())
+            lock (comboKeyLock)
             {
-                if (keyboard.vkCode == (int)vk)
-                {
-                    findComboKey = true;
-                    keys.Add(keyboard.vkCode);
-                    isComboKey = true;
-                    break;
-                }
-            }
-            // 判断是否按下了可选键
-            if (isComboKey)
-            {
-                foreach (var vk in Enum.GetValues<VKOpt>())
+                // 判断是否按下了组合键
+                foreach (var vk in Enum.GetValues<VKCombo>())
                 {
                     if (keyboard.vkCode == (int)vk)
                     {
                         findComboKey = true;
                         keys.Add(keyboard.vkCode);
+                        isComboKey = true;
                         break;
+                    }
+                }
+                // 判断是否按下了可选键
+                if (isComboKey)
+                {
+                    foreach (var vk in Enum.GetValues<VKOpt>())
+                    {
+                        if (keyboard.vkCode == (int)vk)
+                        {
+                            findComboKey = true;
+                            keys.Add(keyboard.vkCode);
+                            break;
+                        }
                     }
                 }
             }
             // 判断是否退出组合键
+            if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
+            {
+                if (isComboKey && !findComboKey)
+                {
+                    lock (comboKeyLock)
+                    {
+                        /*
+                         * 如果有多个可选键
+                         * 1）调整判断策略
+                         * 2）将组合键和可选键分开处理
+                         * 3）同时按了LShift和RShift
+                         * 对于1）和2）意味着增加开销，所以如果遇到3）先了解下情况
+                         * 假设是按着好玩，那就叫他爬，不可以因为找茬的而增大开销
+                         */
+                        if (this.keys.Count != 1 || Enum.GetName((VKOpt)this.keys.ElementAt(0)) == null)
+                        {
+                            List<string> keys = [];
+                            foreach (var key in this.keys)
+                                keys.Add(Enum.GetName((VKCombo)key) ?? Enum.GetName((VKOpt)key)!);
+                            /*
+                             * 代码块复制粘贴标志
+                             * 带有相同标志的代码块说明其由复制粘贴实现，修改时注意同步更改
+                             * 第一次出现的标志带有数量，代表该代码块有几个副本（你修改时的工作量）
+                             * 温馨提示：第一次不算副本
+                             */
+                            // COPY_ExecuteEvent(1)
+                            var e = new DIYKeyEventArgs(KeyInterop.KeyFromVirtualKey(keyboard.vkCode), keys);
+                            KeyOper.Invoke(this, e);
+                            handled = e.Handled;
+                            // endCOPY_ExecuteEvent
+                        }
+                        keys.Clear();
+                        isComboKey = false;
+                    }
+                }
+            }
+            // 判断是否为功能键，以及响应手动取消组合键状态
             if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
             {
                 if (isComboKey)
                 {
                     if (findComboKey)
                     {
-                        keys.Remove(keyboard.vkCode);
-                        if (keys.Count == 0)
-                            isComboKey = false;
-                    }
-                    else
-                    {
-                        List<string> keys = [];
-                        foreach (var key in this.keys)
-                            keys.Add(Enum.GetName((VKCombo)key) ?? Enum.GetName((VKOpt)key)!);
-                        /*
-                         * 代码块复制粘贴标志
-                         * 带有相同标志的代码块说明其由复制粘贴实现，修改时注意同步更改
-                         * 第一次出现的标志带有数量，代表该代码块有几个副本（你修改时的工作量）
-                         * 温馨提示：第一次不算副本
-                         */
-                        // COPY_ExecuteEvent(1)
-                        var e = new DIYKeyEventArgs(KeyInterop.KeyFromVirtualKey(keyboard.vkCode), keys);
-                        KeyOper.Invoke(this, e);
-                        handled = e.Handled;
-                        // endCOPY_ExecuteEvent
-                        isComboKey = false;
+                        lock (comboKeyLock)
+                        {
+                            keys.Remove(keyboard.vkCode);
+                            if (keys.Count == 0)
+                                isComboKey = false;
+                        }
                     }
                 }
                 else
