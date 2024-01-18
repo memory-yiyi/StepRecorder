@@ -18,7 +18,7 @@ namespace StepRecorder.Core.Components
         /// <summary>
         /// 定义点的 x 坐标和 y 坐标。
         /// </summary>
-        /// <remarks>https://learn.microsoft.com/zh-cn/windows/win32/api/windef/ns-windef-point</remarks>
+        /// <see cref="https://learn.microsoft.com/zh-cn/windows/win32/api/windef/ns-windef-point"/>
         [StructLayout(LayoutKind.Sequential)]
         internal struct POINT
         {
@@ -29,7 +29,7 @@ namespace StepRecorder.Core.Components
         /// <summary>
         /// 包含有关低级别鼠标输入事件的信息。
         /// </summary>
-        /// <remarks>https://learn.microsoft.com/zh-cn/windows/win32/api/winuser/ns-winuser-msllhookstruct</remarks>
+        /// <see cref="https://learn.microsoft.com/zh-cn/windows/win32/api/winuser/ns-winuser-msllhookstruct"/>
         [StructLayout(LayoutKind.Sequential)]
         private class MSLLHOOK
         {
@@ -54,7 +54,7 @@ namespace StepRecorder.Core.Components
         /// <summary>
         /// 包含有关低级别键盘输入事件的信息。
         /// </summary>
-        /// <remarks>https://learn.microsoft.com/zh-cn/windows/win32/api/winuser/ns-winuser-kbdllhookstruct</remarks>
+        /// <see cref="https://learn.microsoft.com/zh-cn/windows/win32/api/winuser/ns-winuser-kbdllhookstruct"/>
         [StructLayout(LayoutKind.Sequential)]
         private class KBDLLHOOK
         {
@@ -161,7 +161,7 @@ namespace StepRecorder.Core.Components
         /// <param name="wParam"></param>
         /// <param name="lParam"></param>
         /// <returns></returns>
-        /// <remarks>https://learn.microsoft.com/zh-cn/windows/win32/winmsg/lowlevelmouseproc</remarks>
+        /// <see cref="https://learn.microsoft.com/zh-cn/windows/win32/winmsg/lowlevelmouseproc"/>
         private IntPtr LowLevelMouseProc(int nCode, uint wParam, IntPtr lParam)
         {
             if (nCode < 0 || MouseOper == null)
@@ -209,7 +209,7 @@ namespace StepRecorder.Core.Components
         /// <param name="wParam"></param>
         /// <param name="lParam"></param>
         /// <returns></returns>
-        /// <remarks>https://learn.microsoft.com/zh-cn/windows/win32/winmsg/lowlevelkeyboardproc</remarks>
+        /// <see cref="https://learn.microsoft.com/zh-cn/windows/win32/winmsg/lowlevelkeyboardproc"/>
         private IntPtr LowLevelKeyboardProc(int nCode, uint wParam, IntPtr lParam)
         {
             if (nCode < 0 || KeyOper == null)
@@ -271,8 +271,11 @@ namespace StepRecorder.Core.Components
                             handled = e.Handled;
                             // endCOPY_ExecuteEvent
                         }
-                        keys.Clear();
-                        isComboKey = false;
+                        else
+                        {
+                            keys.Clear();
+                            isComboKey = false;
+                        }
                     }
                 }
             }

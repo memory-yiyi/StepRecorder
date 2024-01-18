@@ -49,7 +49,10 @@ namespace StepRecorder.Core.Components.RecordTools
 
         private readonly List<string> inputs = [];
         private InputHook.POINT? point;
-        internal Rect MouseNotRecordArea { get; set; }
+        /// <summary>
+        /// 鼠标不录制区域，你可以向其传递一个 Size 为 Empty 的 Rect 禁用它
+        /// </summary>
+        internal Rect MouseNotRecordArea { private get; set; }
         private uint? time;
         private readonly uint dbClickTime = GetDoubleClickTime();
 
@@ -60,7 +63,7 @@ namespace StepRecorder.Core.Components.RecordTools
                 string key = e.Keys[0];
                 if (e.Time != null)
                 {
-                    if (MouseNotRecordArea.Contains(e.Point!.Value.x / ProcessInfo.Scaling, e.Point.Value.y / ProcessInfo.Scaling))
+                    if (MouseNotRecordArea.Size.Equals(Size.Empty) || MouseNotRecordArea.Contains(e.Point!.Value.x / ProcessInfo.Scaling, e.Point.Value.y / ProcessInfo.Scaling))
                         return;
                     int i = inputs.Count - 1;
                     if (e.Point.Equals(point) && i >= 0 && inputs[i].IndexOf(key) > 0 && e.Time - time <= dbClickTime)
