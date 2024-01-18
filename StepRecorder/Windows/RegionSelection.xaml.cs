@@ -19,16 +19,13 @@ namespace StepRecorder.Windows
             {
                 lock (instanceLock)
                 {
-                    if (instance == null)
+                    instance ??= new RegionSelection
                     {
-                        instance = new RegionSelection
-                        {
-                            Left = rect.Left,
-                            Top = rect.Top,
-                            Height = rect.Height,
-                            Width = rect.Width
-                        };
-                    }
+                        Left = rect.Left,
+                        Top = rect.Top,
+                        Height = rect.Height,
+                        Width = rect.Width
+                    };
                 }
             }
             return instance;

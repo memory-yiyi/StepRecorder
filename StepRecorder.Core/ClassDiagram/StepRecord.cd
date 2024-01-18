@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="StepRecorder.Core.Components.RecordTools.State">
+    <Position X="4.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\RecordTools\State.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StepRecorder.Core.Components.RecordTools.Record">
+    <Position X="3.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\RecordTools\State.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StepRecorder.Core.Components.RecordTools.Pause">
+    <Position X="7.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\RecordTools\State.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StepRecorder.Core.Components.RecordTools.Note">
+    <Position X="1" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\RecordTools\State.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StepRecorder.Core.Components.RecordTools.Stop">
+    <Position X="5.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\RecordTools\State.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StepRecorder.Core.Components.RecordState">
+    <Position X="10.25" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAIAAAAAAAAAIoAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\RecordState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

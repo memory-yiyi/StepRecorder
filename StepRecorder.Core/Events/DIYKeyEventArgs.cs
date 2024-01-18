@@ -4,19 +4,41 @@ using System.Windows.Input;
 
 namespace StepRecorder.Core.Events
 {
-    internal partial class DIYKeyEventArgs : EventArgs
+    internal partial class DIYKeyEventArgs : DIYInputEventArgs
     {
-        public bool Handled { get; set; } = false;
-        public ReadOnlyCollection<string> Keys { get; }
+        public override ReadOnlyCollection<string> Keys { get; }
 
-        public DIYKeyEventArgs(Key key, List<string>? comboKeys)
+        public DIYKeyEventArgs(Key key, List<string>? comboKeys = null)
         {
             List<string> keys;
-            string lastKey = RenameNum().Replace(key.ToString(), "$2").Replace("Escape", "Esc");
+            string lastKey = key.ToString();
+            if (key < Key.A || key > Key.Z)
+            {
+                lastKey = RenameNum().Replace(lastKey, "$2");
+                switch (lastKey)
+                {
+                    case "Escape": lastKey = "Esc"; break;
+                    case "Return": lastKey = "Enter"; break;
+                    case "Delete": lastKey = "Del"; break;
+                    case "Oem3": lastKey = "`"; break;
+                    case "OemQuestion": lastKey = "/"; break;
+                    case "OemPeriod": lastKey = "."; break;
+                    case "OemComma": lastKey = ","; break;
+                    case "OemPlus": lastKey = "="; break;
+                    case "OemMinus": lastKey = "-"; break;
+                    case "PageUp": lastKey = "PgUp"; break;
+                    case "Next": lastKey = "PgDown"; break;
+                    case "Oem5": lastKey = "\\"; break;
+                    case "OemOpenBrackets": lastKey = "["; break;
+                    case "Oem6": lastKey = "]"; break;
+                    case "Oem1": lastKey = ";"; break;
+                    case "OemQuotes": lastKey = "'"; break;
+                }
+            }
             if (comboKeys != null)
             {
                 keys = ["", "", "", "", ""];
-                foreach(var cKey in comboKeys)
+                foreach (var cKey in comboKeys)
                 {
                     switch (cKey[1..])
                     {
@@ -41,7 +63,6 @@ namespace StepRecorder.Core.Events
                 keys = [lastKey];
             Keys = new ReadOnlyCollection<string>(keys);
         }
-        public DIYKeyEventArgs(Key key) : this(key, null) { }
 
         [GeneratedRegex(@"(D|NumPad)(\d)")]
         private static partial Regex RenameNum();

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="StepRecorder.Core.Components.AreaInfo">
+    <Position X="2.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAAAAAAAAQAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\AreaInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StepRecorder.Core.Components.AreaList">
+    <Position X="6.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>Components\AreaList.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StepRecorder.Core.Components.ProcessInfo">
+    <Position X="1" Y="3.75" Width="2" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Struct Name="StepRecorder.Core.Components.ProcessInfo.WinRect" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Components\ProcessInfo.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAABAAAAAEAAACAAAQAAIAAAAAAAAAA=</HashCode>
+      <FileName>Components\ProcessInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StepRecorder.Core.Components.ScreenInfo">
+    <Position X="3.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\ScreenInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

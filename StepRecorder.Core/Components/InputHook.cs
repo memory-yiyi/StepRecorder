@@ -7,10 +7,38 @@ namespace StepRecorder.Core.Components
     /// <summary>
     /// 键鼠钩子，用于记录键鼠操作
     /// </summary>
-    public class InputHook
+    internal class InputHook
     {
         #region Windows SDKs -> WinUser.h
         private const int WH_MOUSE_LL = 14;
+        private const int WM_MOUSEMOVE = 0x0200;
+        private enum MouseDown : uint { LB = 0x0201, RB = 0x0204, MB = 0x0207 }
+        private enum MouseUp : uint { LB = 0x0202, RB = 0x0205, MB = 0x0208 }
+
+        /// <summary>
+        /// 定义点的 x 坐标和 y 坐标。
+        /// </summary>
+        /// <remarks>https://learn.microsoft.com/zh-cn/windows/win32/api/windef/ns-windef-point</remarks>
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct POINT
+        {
+            public int x;
+            public int y;
+        }
+
+        /// <summary>
+        /// 包含有关低级别鼠标输入事件的信息。
+        /// </summary>
+        /// <remarks>https://learn.microsoft.com/zh-cn/windows/win32/api/winuser/ns-winuser-msllhookstruct</remarks>
+        [StructLayout(LayoutKind.Sequential)]
+        private class MSLLHOOK
+        {
+            public POINT pt;
+            public int mouseData;
+            public int flags;
+            public int time;
+            public UIntPtr dwExtraInfo;
+        }
 
 
         private const int WH_KEYBOARD_LL = 13;
@@ -105,6 +133,7 @@ namespace StepRecorder.Core.Components
         private int mouseHookHandle = 0;
         private int keyboardHookHandle = 0;
 
+        private bool isMouseMove = false;
         private bool isComboKey = false;
         private object comboKeyLock = new();
         private readonly HashSet<int> keys = [];
@@ -112,13 +141,14 @@ namespace StepRecorder.Core.Components
 
         #region 委托与事件
         private delegate IntPtr Hookproc(int code, uint wParam, IntPtr lParam);
+        internal delegate void DIYMouseEventHandler(object sender, DIYMouseEventArgs e);
         internal delegate void DIYKeyEventHandler(object sender, DIYKeyEventArgs e);
 
 
         private Hookproc? mouseHookproc;
         private Hookproc? keyboardHookproc;
 
-        public event MouseButtonEventHandler? MouseButtonEvent;
+        internal event DIYMouseEventHandler? MouseOper;
         internal event DIYKeyEventHandler? KeyOper;
         #endregion
 
@@ -134,11 +164,39 @@ namespace StepRecorder.Core.Components
         /// <remarks>https://learn.microsoft.com/zh-cn/windows/win32/winmsg/lowlevelmouseproc</remarks>
         private IntPtr LowLevelMouseProc(int nCode, uint wParam, IntPtr lParam)
         {
-            if (nCode < 0 || MouseButtonEvent == null)
+            if (nCode < 0 || MouseOper == null)
                 return CallNextHookEx(mouseHookHandle, nCode, wParam, lParam);
 
             bool handled = false;
-
+            if (wParam == WM_MOUSEMOVE)
+                isMouseMove = true;
+            else
+            {
+                foreach (var mouseOper in Enum.GetValues<MouseDown>())
+                {
+                    if (wParam == (uint)mouseOper)
+                    {
+                        isMouseMove = false;
+                        break;
+                    }
+                    else if (wParam == (uint)Enum.Parse<MouseUp>(mouseOper.ToString()) && !isMouseMove)
+                    {
+                        MSLLHOOK mouse = Marshal.PtrToStructure<MSLLHOOK>(lParam)!;
+                        /*
+                         * 代码块复制粘贴标志
+                         * 带有相同标志的代码块说明其由复制粘贴实现，修改时注意同步更改
+                         * 第一次出现的标志带有数量，代表该代码块有几个副本（你修改时的工作量）
+                         * 温馨提示：第一次不算副本
+                         */
+                        // COPY_ExecuteEvent(2)
+                        var e = new DIYMouseEventArgs(mouseOper.ToString(), mouse.pt, mouse.time, Keyboard.IsKeyDown(Key.LeftCtrl));
+                        MouseOper.Invoke(this, e);
+                        handled = e.Handled;
+                        // endCOPY_ExecuteEvent
+                        break;
+                    }
+                }
+            }
 
             return handled ? new IntPtr(1) : CallNextHookEx(mouseHookHandle, nCode, wParam, lParam);
         }
@@ -159,7 +217,7 @@ namespace StepRecorder.Core.Components
 
             bool handled = false;
             bool findComboKey = false;
-            KBDLLHOOK keyboard = (KBDLLHOOK)Marshal.PtrToStructure(lParam, typeof(KBDLLHOOK))!;
+            KBDLLHOOK keyboard = Marshal.PtrToStructure<KBDLLHOOK>(lParam)!;
             lock (comboKeyLock)
             {
                 // 判断是否按下了组合键
@@ -207,13 +265,7 @@ namespace StepRecorder.Core.Components
                             List<string> keys = [];
                             foreach (var key in this.keys)
                                 keys.Add(Enum.GetName((VKCombo)key) ?? Enum.GetName((VKOpt)key)!);
-                            /*
-                             * 代码块复制粘贴标志
-                             * 带有相同标志的代码块说明其由复制粘贴实现，修改时注意同步更改
-                             * 第一次出现的标志带有数量，代表该代码块有几个副本（你修改时的工作量）
-                             * 温馨提示：第一次不算副本
-                             */
-                            // COPY_ExecuteEvent(1)
+                            // COPY_ExecuteEvent
                             var e = new DIYKeyEventArgs(KeyInterop.KeyFromVirtualKey(keyboard.vkCode), keys);
                             KeyOper.Invoke(this, e);
                             handled = e.Handled;
