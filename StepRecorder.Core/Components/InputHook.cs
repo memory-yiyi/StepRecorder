@@ -34,9 +34,9 @@ namespace StepRecorder.Core.Components
         private class MSLLHOOK
         {
             public POINT pt;
-            public int mouseData;
-            public int flags;
-            public int time;
+            public uint mouseData;
+            public uint flags;
+            public uint time;
             public UIntPtr dwExtraInfo;
         }
 
@@ -59,9 +59,9 @@ namespace StepRecorder.Core.Components
         private class KBDLLHOOK
         {
             public int vkCode;
-            public int scanCode;
-            public int flags;
-            public int time;
+            public uint scanCode;
+            public uint flags;
+            public uint time;
             public UIntPtr dwExtraInfo;
         }
 
@@ -87,7 +87,7 @@ namespace StepRecorder.Core.Components
         {
             Stop();
         }
-        public void Start()
+        internal void Start()
         {
             if (mouseHookHandle == 0)
             {
@@ -108,7 +108,7 @@ namespace StepRecorder.Core.Components
                 }
             }
         }
-        public void Stop()
+        internal void Stop()
         {
             if (mouseHookHandle != 0)
             {

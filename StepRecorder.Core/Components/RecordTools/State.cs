@@ -2,12 +2,12 @@
 {
     internal abstract class State
     {
-        public abstract void ChangeState(RecordState recordState, bool? stopSign);
+        internal abstract void ChangeState(RecordState recordState, bool? stopSign);
     }
 
     internal class Record : State
     {
-        public override void ChangeState(RecordState recordState, bool? stopSign)
+        internal override void ChangeState(RecordState recordState, bool? stopSign)
         {
             if (stopSign == null)
             {   // 切换到Note
@@ -28,7 +28,7 @@
 
     internal class Pause : State
     {
-        public override void ChangeState(RecordState recordState, bool? stopSign)
+        internal override void ChangeState(RecordState recordState, bool? stopSign)
         {
             if (stopSign == true)
             {   // 切换到Stop
@@ -44,7 +44,7 @@
 
     internal class Note : State
     {
-        public override void ChangeState(RecordState recordState, bool? stopSign)
+        internal override void ChangeState(RecordState recordState, bool? stopSign)
         {   // 切换到Record
             recordState.SetCurrentState(new Record());
         }
@@ -52,7 +52,7 @@
 
     internal class Stop : State
     {
-        public override void ChangeState(RecordState recordState, bool? stopSign)
+        internal override void ChangeState(RecordState recordState, bool? stopSign)
         {
             if (stopSign == true)
             {   // End，录制结束

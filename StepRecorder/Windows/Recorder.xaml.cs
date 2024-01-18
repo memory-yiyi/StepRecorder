@@ -128,11 +128,15 @@ namespace StepRecorder.Windows
             if (e.Source is FrameworkElement source)
             {
                 string nextState = source.Name;
+                if (recordState.GetCurrentState() == "Stop")
+                {
+                    DrawArea.IsEnabled = false;
+                    recordState.SetMouseNotRecordArea(new Rect(this.Left, this.Top, this.Width, this.Height));
+                }
                 recordState.ChangeCurrentState(nextState);
                 switch (nextState)
                 {
                     case "Record":
-                        if (DrawArea.IsEnabled) DrawArea.IsEnabled = false;
                         SetButtonEnable(false, true, true, true);
                         break;
                     case "Pause":
@@ -163,6 +167,6 @@ namespace StepRecorder.Windows
                 regionWindow?.Close();
                 e.Handled = true;
             }
-        } 
+        }
     }
 }

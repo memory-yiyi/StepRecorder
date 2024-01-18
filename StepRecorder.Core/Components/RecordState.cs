@@ -1,4 +1,5 @@
 ﻿using StepRecorder.Core.Components.RecordTools;
+using System.Windows;
 
 namespace StepRecorder.Core.Components
 {
@@ -45,7 +46,8 @@ namespace StepRecorder.Core.Components
         #endregion
 
         #region 工具
-        internal Hook MKbHook { get; set; } = new();
+        internal Hook MKbHook { get; } = new();
+        public void SetMouseNotRecordArea(Rect rect) => MKbHook.MouseNotRecordArea = rect;
         #endregion
     }
 }

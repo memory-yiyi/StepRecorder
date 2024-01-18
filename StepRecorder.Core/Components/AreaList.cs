@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
 
 namespace StepRecorder.Core.Components
@@ -16,11 +17,14 @@ namespace StepRecorder.Core.Components
             AreaInfos.Add(new ScreenInfo((string)Application.Current.Resources["S.Recorder.DrawArea.FullScreen"], ""));
             foreach (Process p in Process.GetProcesses())
             {
-                if (p.MainWindowHandle != IntPtr.Zero && !ProcessInfo.IsIconic(p.MainWindowHandle)) 
+                if (p.MainWindowHandle != IntPtr.Zero && !IsIconic(p.MainWindowHandle)) 
                 {
                     AreaInfos.Add(new ProcessInfo(p.ProcessName, p.MainWindowTitle, p.MainWindowHandle));
                 }
             }
         }
+
+        [DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr hWnd);
     }
 }

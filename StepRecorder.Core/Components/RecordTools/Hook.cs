@@ -1,4 +1,5 @@
 ﻿using StepRecorder.Core.Events;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 
@@ -12,7 +13,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <summary>
         /// 安装键鼠钩子
         /// </summary>
-        public void Install()
+        internal void Install()
         {
             inputHook.Start();
             Start();
@@ -21,7 +22,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <summary>
         /// 卸载键鼠钩子
         /// </summary>
-        public void Uninstall()
+        internal void Uninstall()
         {
             Stop();
             inputHook.Stop();
@@ -30,7 +31,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <summary>
         /// 启用键鼠钩子
         /// </summary>
-        public void Start()
+        internal void Start()
         {
             inputHook.MouseOper += RecordInput;
             inputHook.KeyOper += RecordInput;
@@ -39,23 +40,54 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <summary>
         /// 停用键鼠钩子
         /// </summary>
-        public void Stop()
+        internal void Stop()
         {
             inputHook.MouseOper -= RecordInput;
             inputHook.KeyOper -= RecordInput;
         }
         #endregion
 
+        private readonly List<string> inputs = [];
+        private InputHook.POINT? point;
+        internal Rect MouseNotRecordArea { get; set; }
+        private uint? time;
+        private readonly uint dbClickTime = GetDoubleClickTime();
+
         private void RecordInput(object sender, DIYInputEventArgs e)
         {
-            if (e.Keys[0] == "LB")
-                return;
-            StringBuilder sb = new();
-            foreach (var key in e.Keys)
+            if (e.Keys.Count == 1)
             {
-                sb.Append(key);
+                string key = e.Keys[0];
+                if (e.Time != null)
+                {
+                    if (MouseNotRecordArea.Contains(e.Point!.Value.x / ProcessInfo.Scaling, e.Point.Value.y / ProcessInfo.Scaling))
+                        return;
+                    int i = inputs.Count - 1;
+                    if (e.Point.Equals(point) && i >= 0 && inputs[i].IndexOf(key) > 0 && e.Time - time <= dbClickTime)
+                    {
+                        if (inputs[i] == $"&{key}")
+                            inputs[i] = $"&DB{key}";
+                        else if (inputs[i] == $"&DB{key}")
+                            inputs[i] = $"&TP{key}";
+                    }
+                    else
+                        inputs.Add($"&{key}");
+                }
+                else
+                    inputs.Add($"&{key}");
             }
-            MessageBox.Show(sb.ToString());
+            else
+            {
+                StringBuilder sb = new();
+                foreach (var key in e.Keys)
+                    sb.Append($"&{key}");
+                inputs.Add(sb.ToString());
+            }
+            point = e.Point;
+            time = e.Time;
         }
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDoubleClickTime();
     }
 }

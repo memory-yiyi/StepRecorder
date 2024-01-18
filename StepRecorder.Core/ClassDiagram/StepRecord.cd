@@ -36,9 +36,9 @@
     </TypeIdentifier>
   </Class>
   <Class Name="StepRecorder.Core.Components.RecordState">
-    <Position X="10.25" Y="2.5" Width="2" />
+    <Position X="10.25" Y="2.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAABAAAAAAAAAAAAIAAAAAAAAAIoAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAABAAAAAAAAAAAAIAAAAAAAAAIoAAAAAAAAAABAAAA=</HashCode>
       <FileName>Components\RecordState.cs</FileName>
     </TypeIdentifier>
   </Class>

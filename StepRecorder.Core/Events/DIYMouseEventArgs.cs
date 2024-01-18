@@ -7,7 +7,7 @@ namespace StepRecorder.Core.Events
     {
         public override ReadOnlyCollection<string> Keys { get; }
 
-        public DIYMouseEventArgs(string mouse, InputHook.POINT point, int time, bool lCtrl = false)
+        public DIYMouseEventArgs(string mouse, InputHook.POINT point, uint time, bool lCtrl = false)
         {
             if (lCtrl)
                 Keys = new ReadOnlyCollection<string>(["LCtrl", mouse]);

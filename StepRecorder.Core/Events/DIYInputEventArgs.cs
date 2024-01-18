@@ -8,6 +8,6 @@ namespace StepRecorder.Core.Events
         public bool Handled { get; set; } = false;
         public abstract ReadOnlyCollection<string> Keys { get; }
         public InputHook.POINT? Point { get; init; } = null;
-        public int? Time { get; init; } = null;
+        public uint? Time { get; init; } = null;
     }
 }
