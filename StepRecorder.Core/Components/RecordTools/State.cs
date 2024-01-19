@@ -56,11 +56,11 @@
         {
             if (stopSign == true)
             {   // End，录制结束
-                recordState.MKbHook.Uninstall();
+                recordState.UninstallHook();
             }
             else
             {   // 切换到Record
-                recordState.MKbHook.Install();
+                recordState.InstallHook();
                 recordState.SetCurrentState(new Record());
             }
         }

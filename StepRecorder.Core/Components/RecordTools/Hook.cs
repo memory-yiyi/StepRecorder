@@ -1,4 +1,5 @@
 ﻿using StepRecorder.Core.Events;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -49,11 +50,13 @@ namespace StepRecorder.Core.Components.RecordTools
 
         private readonly List<string> inputs = [];
         private InputHook.POINT? point;
+        private uint? time;
+        private int lastListNum = 0;
+        internal PropertyChangedEventHandler? CatchKeyframe;
         /// <summary>
         /// 鼠标不录制区域，你可以向其传递一个 Size 为 Empty 的 Rect 禁用它
         /// </summary>
         internal Rect MouseNotRecordArea { private get; set; }
-        private uint? time;
         private readonly uint dbClickTime = GetDoubleClickTime();
 
         private void RecordInput(object sender, DIYInputEventArgs e)
@@ -88,6 +91,11 @@ namespace StepRecorder.Core.Components.RecordTools
             }
             point = e.Point;
             time = e.Time;
+            if (inputs.Count != lastListNum)
+            {
+                CatchKeyframe?.Invoke(this, new PropertyChangedEventArgs("KeyframeNum"));
+                lastListNum = inputs.Count;
+            }
         }
 
         [DllImport("user32.dll")]

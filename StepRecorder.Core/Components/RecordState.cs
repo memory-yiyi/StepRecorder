@@ -45,14 +45,18 @@ namespace StepRecorder.Core.Components
         internal void SetCurrentState(State state) => currentState = state;
         #endregion
 
-        #region 工具
-        internal Hook MKbHook { get; } = new();
+        #region 键鼠钩子
+        private readonly Hook mkbHook = new();
 
+        internal void InstallHook() => mkbHook.Install();
+        internal void UninstallHook() => mkbHook.Uninstall();
+        internal void StartHook() => mkbHook.Start();
+        internal void StopHook() => mkbHook.Stop();
         /// <summary>
         /// 设置鼠标不录制区域
         /// </summary>
         /// <param name="rect">一个区域，当其 Size 属性为 Size.Empty 时，禁用该功能</param>
-        public void SetMouseNotRecordArea(Rect rect) => MKbHook.MouseNotRecordArea = rect;
+        public void SetMouseNotRecordArea(Rect rect) => mkbHook.MouseNotRecordArea = rect;
         #endregion
     }
 }
