@@ -1,0 +1,27 @@
+﻿<Window x:Class="StepRecorder.Windows.Notes"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Notes" Height="160" Width="320"
+        WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="120"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBox Name="Short" MaxLength="50" FontWeight="Bold" Text="{DynamicResource S.Note.DefaultTip.Short}"/>
+        <TextBox Name="Detail" Grid.Row="1" Text="{DynamicResource S.Note.DefaultTip.Detail}"
+                 AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"/>
+        <Grid Grid.Row="2" ButtonBase.Click="Grid_Click">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Click="OK_Click" Content="{DynamicResource S.Share.OK}"/>
+            <Button Click="Cancel_Click" Grid.Column="1" Content="{DynamicResource S.Share.Cancel}"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -11,11 +11,14 @@
         {
             if (stopSign == null)
             {   // 切换到Note
+                recordState.PauseRecord();
                 recordState.SetCurrentState(new Note());
+                recordState.GetNoteContent();
                 recordState.ChangeCurrentState("Record");
             }   // 完成后自动跳转到Record
             else if (stopSign == false)
             {   // 切换到Pause
+                recordState.PauseRecord();
                 recordState.SetCurrentState(new Pause());
             }
             else
@@ -37,6 +40,7 @@
             }   // 完成后自动跳转到End
             else
             {   // 切换到Record
+                recordState.ContinueRecord();
                 recordState.SetCurrentState(new Record());
             }
         }
@@ -46,6 +50,7 @@
     {
         internal override void ChangeState(RecordState recordState, bool? stopSign)
         {   // 切换到Record
+            recordState.ContinueRecord();
             recordState.SetCurrentState(new Record());
         }
     }
@@ -56,11 +61,11 @@
         {
             if (stopSign == true)
             {   // End，录制结束
-                recordState.UninstallHook();
+                recordState.StopRecord();
             }
             else
             {   // 切换到Record
-                recordState.InstallHook();
+                recordState.StartRecord();
                 recordState.SetCurrentState(new Record());
             }
         }

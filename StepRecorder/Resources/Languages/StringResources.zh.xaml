@@ -2,6 +2,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:s="clr-namespace:System;assembly=mscorlib">
     
+    <!-- 公共字段 -->
+    <s:String x:Key="S.Share.OK">确定</s:String>
+    <s:String x:Key="S.Share.Cancel">取消</s:String>
+    
     <!-- 程序主界面 -->
     <s:String x:Key="S.Main.Title">Step Recorder - Plus Max Pro</s:String>
     <s:String x:Key="S.Main.Recorder">记录器</s:String>
@@ -18,4 +22,8 @@
     <!-- 设置 -->
     <s:String x:Key="S.Settings.Title">Step Recorder - 设置</s:String>
     
+    <!-- 注释帧 -->
+    <s:String x:Key="S.Note.DefaultTip.Short">一句概要，简述步骤</s:String>
+    <s:String x:Key="S.Note.DefaultTip.Detail">一段详细描述</s:String>
+
 </ResourceDictionary>

@@ -18,6 +18,7 @@ namespace StepRecorder.Core.Components
         /*
          * 知道为什么分辨率和缩放比例改变时，有些程序需要重启自己才生效了？
          * 你可以把它放构造函数里，这样就不用重启了，但会增大开销
+         * 你还可以把它单独放一个函数里，当外面触发 DpiChanged 时调用，这样就完美了（遇到了再加，不要过度设计）
          */
         static ProcessInfo()
         {

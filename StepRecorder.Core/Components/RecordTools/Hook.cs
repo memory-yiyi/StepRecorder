@@ -54,9 +54,9 @@ namespace StepRecorder.Core.Components.RecordTools
         private int lastListNum = 0;
         internal PropertyChangedEventHandler? CatchKeyframe;
         /// <summary>
-        /// 鼠标不录制区域，你可以向其传递一个 Size 为 Empty 的 Rect 禁用它
+        /// 鼠标不录制区域，当其为 Empty 时禁用该功能
         /// </summary>
-        internal Rect MouseNotRecordArea { private get; set; }
+        internal Rect MouseNotRecordArea { private get; set; } = Rect.Empty;
         private readonly uint dbClickTime = GetDoubleClickTime();
 
         private void RecordInput(object sender, DIYInputEventArgs e)
@@ -66,7 +66,7 @@ namespace StepRecorder.Core.Components.RecordTools
                 string key = e.Keys[0];
                 if (e.Time != null)
                 {
-                    if (MouseNotRecordArea.Size.Equals(Size.Empty) || MouseNotRecordArea.Contains(e.Point!.Value.x / ProcessInfo.Scaling, e.Point.Value.y / ProcessInfo.Scaling))
+                    if (!MouseNotRecordArea.IsEmpty && MouseNotRecordArea.Contains(e.Point!.Value.x / ProcessInfo.Scaling, e.Point.Value.y / ProcessInfo.Scaling))
                         return;
                     int i = inputs.Count - 1;
                     if (e.Point.Equals(point) && i >= 0 && inputs[i].IndexOf(key) > 0 && e.Time - time <= dbClickTime)
@@ -97,6 +97,17 @@ namespace StepRecorder.Core.Components.RecordTools
                 lastListNum = inputs.Count;
             }
         }
+
+        internal void RecordNote()
+        {
+            inputs.Add("&Note");
+            point = null;
+            time = null;
+            CatchKeyframe?.Invoke(this, new PropertyChangedEventArgs("KeyframeNum"));
+            ++lastListNum;
+        }
+
+        internal int GetCurrentKeyframeNum() => inputs.Count;
 
         [DllImport("user32.dll")]
         private static extern uint GetDoubleClickTime();

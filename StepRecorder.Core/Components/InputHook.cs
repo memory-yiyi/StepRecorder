@@ -135,7 +135,7 @@ namespace StepRecorder.Core.Components
 
         private bool isMouseMove = false;
         private bool isComboKey = false;
-        private object comboKeyLock = new();
+        private readonly object comboKeyLock = new();
         private readonly HashSet<int> keys = [];
         #endregion
 

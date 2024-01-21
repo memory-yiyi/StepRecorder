@@ -9,7 +9,7 @@ namespace StepRecorder.ViewModel
         /// <summary>
         /// 获取即将跳转到的下一个窗体
         /// </summary>
-        public ICommand GetNextWindow
+        public static ICommand GetNextWindow
         {
             get
             {

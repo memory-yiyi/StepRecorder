@@ -31,7 +31,7 @@ namespace StepRecorder.Windows
         private Recorder()
         {
             areaList = new AreaList();
-            recordState = new RecordState();
+            recordState = new RecordState(SendNoteContent);
             InitializeComponent();
             DrawArea.ItemsSource = areaList.AreaInfos;
             this.ShowInTaskbar = false;
@@ -133,6 +133,8 @@ namespace StepRecorder.Windows
                     DrawArea.IsEnabled = false;
                     recordState.SetMouseNotRecordArea(new Rect(this.Left, this.Top, this.Width, this.Height));
                 }
+                if (nextState == "Note" || nextState == "Stop")
+                    SetButtonEnable(false, false, false, false);
                 recordState.ChangeCurrentState(nextState);
                 switch (nextState)
                 {
@@ -143,18 +145,19 @@ namespace StepRecorder.Windows
                         SetButtonEnable(true, false, false, true);
                         break;
                     case "Note":
-                        SetButtonEnable(false, false, false, false);
-                        break;
-                    case "Stop":
-                        SetButtonEnable(false, false, false, false);
-                        break;
-                }
-                if (nextState == "Note")
-                {
-                    SetButtonEnable(false, true, true, true);
+                        goto case "Record";
                 }
                 e.Handled = true;
             }
+        }
+
+        private static RecordState.NoteContent? SendNoteContent()
+        {
+            var noteWindow = new Notes();
+            if (noteWindow.ShowDialog() == true)
+                return new RecordState.NoteContent(noteWindow.Short.Text[..], noteWindow.Detail.Text[..]);
+            else
+                return null;
         }
         #endregion
 
