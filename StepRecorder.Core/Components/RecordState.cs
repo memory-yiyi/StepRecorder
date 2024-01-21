@@ -6,6 +6,7 @@ namespace StepRecorder.Core.Components
     /// <summary>
     /// 记录器的状态类，维护记录器当前运行状态
     /// </summary>
+    /// <param name="noteDelegate">一个委托，用于接收从其它类获取的注释帧信息</param>
     public class RecordState(RecordState.NoteDelegate noteDelegate)
     {
         #region 状态控制
@@ -65,6 +66,10 @@ namespace StepRecorder.Core.Components
         }
         #region 键鼠钩子
         public record NoteContent(string Short, string Detail);
+        /// <summary>
+        /// 接收从其它类获取的注释帧信息
+        /// </summary>
+        /// <returns>返回值为 null 时，取消本次捕获注释帧的请求</returns>
         public delegate NoteContent? NoteDelegate();
 
         private readonly Hook mkbHook = new();
@@ -75,6 +80,9 @@ namespace StepRecorder.Core.Components
         /// </summary>
         /// <param name="rect">一个区域，当其为 Rect.Empty 时，禁用该功能</param>
         public void SetMouseNotRecordArea(Rect rect) => mkbHook.MouseNotRecordArea = rect;
+        /// <summary>
+        /// 发起捕获注释帧请求，从其它类获取注释帧信息
+        /// </summary>
         internal void GetNoteContent()
         {
              if (noteDelegate.Invoke() is NoteContent nc)
