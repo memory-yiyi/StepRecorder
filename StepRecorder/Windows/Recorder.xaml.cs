@@ -132,6 +132,7 @@ namespace StepRecorder.Windows
                 {
                     DrawArea.IsEnabled = false;
                     recordState.SetMouseNotRecordArea(new Rect(this.Left, this.Top, this.Width, this.Height));
+                    recordState.SetRecordArea(new Rect(regionWindow!.Left, regionWindow.Top, regionWindow.Width, regionWindow.Height));
                 }
                 if (nextState == "Note" || nextState == "Stop")
                     SetButtonEnable(false, false, false, false);

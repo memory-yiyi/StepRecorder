@@ -47,23 +47,39 @@ namespace StepRecorder.Core.Components
         #region 录制工具
         internal void StartRecord()
         {
+            if (recordTool == null)
+                throw new NullReferenceException("未指定录制区域");
+            recordTool.Start();
             mkbHook.Install();
+            mkbHook.CatchKeyframe += recordTool.NoteKeyframe;
         }
 
         internal void PauseRecord()
         {
             mkbHook.Stop();
+            recordTool!.Suspend();
         }
 
         internal void ContinueRecord()
         {
+            recordTool!.Resume();
             mkbHook.Start();
         }
 
         internal void StopRecord()
         {
             mkbHook.Uninstall();
+            mkbHook.CatchKeyframe -= recordTool!.NoteKeyframe;
+            recordTool.Stop();
         }
+
+        private RecordTool? recordTool;
+        public void SetRecordArea(Rect rect) => recordTool = new RecordTool(
+            new System.Drawing.Rectangle(
+                (int)(rect.Left * ProcessInfo.Scaling),
+                (int)(rect.Top * ProcessInfo.Scaling),
+                (int)(rect.Width * ProcessInfo.Scaling),
+                (int)(rect.Height * ProcessInfo.Scaling)));
         #region 键鼠钩子
         public record NoteContent(string Short, string Detail);
         /// <summary>
@@ -85,7 +101,7 @@ namespace StepRecorder.Core.Components
         /// </summary>
         internal void GetNoteContent()
         {
-             if (noteDelegate.Invoke() is NoteContent nc)
+            if (noteDelegate.Invoke() is NoteContent nc)
             {
                 mkbHook.RecordNote();
                 notes.Add((mkbHook.GetCurrentKeyframeNum(), nc));

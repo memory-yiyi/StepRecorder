@@ -52,7 +52,7 @@ namespace StepRecorder.Core.Components.RecordTools
         private InputHook.POINT? point;
         private uint? time;
         private int lastListNum = 0;
-        internal PropertyChangedEventHandler? CatchKeyframe;
+        internal event EventHandler? CatchKeyframe;
         /// <summary>
         /// 鼠标不录制区域，当其为 Empty 时禁用该功能
         /// </summary>
@@ -93,7 +93,7 @@ namespace StepRecorder.Core.Components.RecordTools
             time = e.Time;
             if (inputs.Count != lastListNum)
             {
-                CatchKeyframe?.Invoke(this, new PropertyChangedEventArgs("KeyframeNum"));
+                CatchKeyframe?.Invoke(this, new EventArgs());
                 lastListNum = inputs.Count;
             }
         }
@@ -103,7 +103,7 @@ namespace StepRecorder.Core.Components.RecordTools
             inputs.Add("&Note");
             point = null;
             time = null;
-            CatchKeyframe?.Invoke(this, new PropertyChangedEventArgs("KeyframeNum"));
+            CatchKeyframe?.Invoke(this, new EventArgs());
             ++lastListNum;
         }
 

@@ -94,18 +94,14 @@ namespace StepRecorder.Core.Components
                 mouseHookproc = LowLevelMouseProc;
                 mouseHookHandle = SetWindowsHookEx(WH_MOUSE_LL, mouseHookproc, IntPtr.Zero, 0);
                 if (mouseHookHandle == 0)
-                {
-                    throw new NotImplementedException("鼠标钩子安装异常");
-                }
+                    throw new InvalidOperationException("鼠标钩子安装异常");
             }
             if (keyboardHookHandle == 0)
             {
                 keyboardHookproc = LowLevelKeyboardProc;
                 keyboardHookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardHookproc, IntPtr.Zero, 0);
                 if (keyboardHookHandle == 0)
-                {
-                    throw new NotImplementedException("键盘钩子安装异常");
-                }
+                    throw new InvalidOperationException("键盘钩子安装异常");
             }
         }
         internal void Stop()
@@ -113,17 +109,13 @@ namespace StepRecorder.Core.Components
             if (mouseHookHandle != 0)
             {
                 if (UnhookWindowsHookEx(mouseHookHandle) == 0)
-                {
-                    throw new NotImplementedException("鼠标钩子卸载异常");
-                }
+                    throw new InvalidOperationException("鼠标钩子卸载异常");
                 mouseHookHandle = 0;
             }
             if (keyboardHookHandle != 0)
             {
                 if (UnhookWindowsHookEx(keyboardHookHandle) == 0)
-                {
-                    throw new NotImplementedException("键盘钩子卸载异常");
-                }
+                    throw new InvalidOperationException("键盘钩子卸载异常");
                 keyboardHookHandle = 0;
             }
         }
