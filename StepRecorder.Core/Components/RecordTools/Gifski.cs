@@ -1,12 +1,14 @@
 ﻿using System.Runtime.InteropServices;
-using System.Windows.Media.Imaging;
 
 namespace StepRecorder.Core.Components.RecordTools
 {
+    /// <summary>
+    /// Highest-quality GIF encoder
+    /// </summary>
     internal class Gifski
     {
         // 标注 Gifski 版本，保留供以后使用
-        private readonly Version _version = new(1, 14, 1);
+        //private readonly Version _version = new(1, 14, 1);
 
         #region gifski.h
         /// <summary>
@@ -130,6 +132,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <param name="frameNumber">
         /// 对帧（从0开始的连续数字）进行排序。
         /// 您可以按任何顺序添加帧，它们将按“frame_number”进行排序。
+        /// 尽管可以无序添加帧，但当帧数过多时，这种无序性会大幅增加内存开销，甚至可能无法提供足够的内存来处理图像。
         /// </param>
         /// <param name="filePath">文件路径必须是有效的UTF-8。</param>
         /// <param name="presentationTimestamp">
@@ -140,7 +143,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// </param>
         /// <returns>Returns 0 (`GIFSKI_OK`) on success, and non-0 `GIFSKI_*` constant on error.</returns>
         /// <remarks>This function may block and wait until the frame is processed. Make sure to call `gifski_set_write_callback` or `SetFileOutputDelegate` first to avoid a deadlock.</remarks>
-        //private delegate GifskiError AddPngFrameDelegate(UIntPtr handle, uint frameNumber, [MarshalAs(UnmanagedType.LPUTF8Str)] string filePath, double presentationTimestamp);
+        private delegate GifskiError AddPngFrameDelegate(UIntPtr handle, uint frameNumber, [MarshalAs(UnmanagedType.LPUTF8Str)] string filePath, double presentationTimestamp);
         /// <summary>
         /// 将帧添加到动画中。此函数是异步的。
         /// </summary>
@@ -148,6 +151,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <param name="frameNumber">
         /// 对帧（从0开始的连续数字）进行排序。
         /// 您可以按任何顺序添加帧，它们将按“frame_number”进行排序。
+        /// 尽管可以无序添加帧，但当帧数过多时，这种无序性会大幅增加内存开销，甚至可能无法提供足够的内存来处理图像。
         /// </param>
         /// <param name="width"></param>
         /// <param name="bytesPerRow"></param>
@@ -172,7 +176,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// </remarks>
         /// <see cref="gifski_add_frame_rgba_stride"/>
         /// <seealso cref="gifski_add_frame_rgba"/>
-        private delegate GifskiError AddRgbFrameDelegate(UIntPtr handle, uint frameNumber, uint width, uint bytesPerRow, uint height, IntPtr pixels, double presentationTimestamp);
+        //private delegate GifskiError AddRgbFrameDelegate(UIntPtr handle, uint frameNumber, uint width, uint bytesPerRow, uint height, IntPtr pixels, double presentationTimestamp);
 
         /// <summary>
         /// Start writing to the file at `destination_path` (overwrites if needed).
@@ -199,8 +203,8 @@ namespace StepRecorder.Core.Components.RecordTools
         private delegate GifskiError FinishDelegate(UIntPtr handle);
 
         private readonly NewDelegate _new;
-        //private readonly AddPngFrameDelegate _addPngFrame;
-        private readonly AddRgbFrameDelegate _addRgbFrame;
+        private readonly AddPngFrameDelegate _addPngFrame;
+        //private readonly AddRgbFrameDelegate _addRgbFrame;
 
         private readonly SetFileOutputDelegate _setFileOutput;
         private readonly FinishDelegate _finish;
@@ -211,8 +215,8 @@ namespace StepRecorder.Core.Components.RecordTools
         public Gifski()
         {
             _new = LoadFunction<NewDelegate>("gifski.dll", "gifski_new");
-            //_addPngFrame = LoadFunction<AddPngFrameDelegate>("gifski.dll", "gifski_add_frame_png_file");
-            _addRgbFrame = LoadFunction<AddRgbFrameDelegate>("gifski.dll", "gifski_add_frame_rgb");
+            _addPngFrame = LoadFunction<AddPngFrameDelegate>("gifski.dll", "gifski_add_frame_png_file");
+            //_addRgbFrame = LoadFunction<AddRgbFrameDelegate>("gifski.dll", "gifski_add_frame_rgb");
 
             _setFileOutput = LoadFunction<SetFileOutputDelegate>("gifski.dll", "gifski_set_file_output");
             _finish = LoadFunction<FinishDelegate>("gifski.dll", "gifski_finish");
@@ -261,16 +265,24 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <summary>
         /// 增加帧
         /// </summary>
+        /// <param name="path">图像文件路径</param>
+        /// <param name="index">图像在 Gif 文件中的序号</param>
+        /// <param name="ipts">图像相对于开始录制时的时间，单位为毫秒</param>
+        internal void AddFrame(string path, uint index, uint ipts) => _addPngFrame(gifskiHandle, index, path, ipts / 1000d);
+
+        /// <summary>
+        /// 增加帧
+        /// </summary>
         /// <param name="source">图像像素集</param>
         /// <param name="index">图像在 Gif 文件中的序号</param>
-        /// <param name="pts">图像相对于开始录制时的时间，单位为秒</param>
-        internal void AddFrame(BitmapSource source, uint index, double pts)
-        {
-            PixelTool tool = new(source);
-            tool.HandlePixelInfos();
-            _ = _addRgbFrame(gifskiHandle, index, tool.Width, tool.BytesPerRow, tool.Height, tool.PixelsAddress, pts);
-            tool.Dispose();
-        }
+        /// <param name="ipts">图像相对于开始录制时的时间，单位为毫秒</param>
+        //internal void AddFrame(BitmapSource source, uint index, uint ipts)
+        //{
+        //    PixelTool tool = new(source);
+        //    tool.HandlePixelInfos();
+        //    _ = _addRgbFrame(gifskiHandle, index, tool.Width, tool.BytesPerRow, tool.Height, tool.PixelsAddress, ipts / 1000d);
+        //    tool.Dispose();
+        //}
 
         #region 加载 DLL 函数
         private static T LoadFunction<T>(string dllPath, string functionName) where T : Delegate => Marshal.GetDelegateForFunctionPointer<T>(GetProcAddress(LoadLibrary(dllPath), functionName));

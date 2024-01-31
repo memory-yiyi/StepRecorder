@@ -3,6 +3,9 @@ using System.Windows.Media.Imaging;
 
 namespace StepRecorder.Core.Components.RecordTools
 {
+    /// <summary>
+    /// 图像像素处理类，可以提供一个指向图像像素集的地址
+    /// </summary>
     internal class PixelTool : IDisposable
     {
         #region 释放模式

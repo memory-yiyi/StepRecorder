@@ -6,6 +6,9 @@ using System.Runtime.Versioning;
 
 namespace StepRecorder.Core.Components.RecordTools
 {
+    /// <summary>
+    /// GIF 录制工具
+    /// </summary>
     internal class RecordTool
     {
         private readonly Rectangle recordArea;
@@ -13,8 +16,10 @@ namespace StepRecorder.Core.Components.RecordTools
         private readonly CancellationTokenSource _cts = new();
         private readonly AutoResetEvent _waitToResume = new(false);
         private CancellationTokenSource _waitToSuspend = new();
-        //private readonly Gifski gifski = new();
+
         private readonly string _framesDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}tmp\\";
+        private readonly string _gifDefaultOutputDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}out\\";
+        private string? _gifDefaultOutputPath;
 
         //private readonly int fps = 10;
         private readonly List<int> keyframeNos = [];
@@ -36,6 +41,8 @@ namespace StepRecorder.Core.Components.RecordTools
             if (Directory.Exists(_framesDirectory))
                 Directory.Delete(_framesDirectory, true);
             Directory.CreateDirectory(_framesDirectory);
+            if (!Directory.Exists(_gifDefaultOutputDirectory))
+                Directory.CreateDirectory(_gifDefaultOutputDirectory);
         }
 
         ~RecordTool()
@@ -47,16 +54,12 @@ namespace StepRecorder.Core.Components.RecordTools
 
         internal void NoteKeyframe(object? sender, EventArgs e) => keyframeNos.Add(currentFrameNo);
 
-        internal void Start()
-        {
-            //gifski.Start("test.gif", (uint)recordArea.Width, (uint)recordArea.Height, 50);
-            recordThread.Start();
-        }
+        internal void Start() => recordThread.Start();
 
         internal void Stop()
         {
             _cts.Cancel();
-            //gifski.Stop();
+            MergeFrames(recordArea.Width, recordArea.Height, _framesDirectory, _gifDefaultOutputDirectory, out _gifDefaultOutputPath);
         }
 
         /// <summary>
@@ -110,7 +113,33 @@ namespace StepRecorder.Core.Components.RecordTools
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        private static extern bool DeleteObject(IntPtr hObject);
+        private static void MergeFrames(int width, int height, string framesDirectory, string gifDefaultOutputDirectory, out string gifDefaultOutputPath)
+        {
+            gifDefaultOutputPath = $"{gifDefaultOutputDirectory}Steps{DateTime.Now:_yyyyMMdd_HHmmss}.gif";
+            Gifski gifski = new();
+            gifski.Start(gifDefaultOutputPath, (uint)width, (uint)height, 90, true);
+            /*
+             * 为什么不在创建的时候分出一个表?
+             * - 列表增大需要一些时间完成开销，这会给本身帧率就勉强的程序雪上加霜
+             * - 静态也回答了你，这使此函数可以独立，你可以在需要的时候调整它的访问性
+             *       比如：你需要在类外进行合并操作
+             */
+            SortedList<uint, (string path, uint ipts)> sortPaths = [];
+
+            foreach (var path in Directory.EnumerateFiles(framesDirectory))
+            {
+                var infos = Path.GetRelativePath(framesDirectory, path).Split('.');
+                sortPaths.Add(uint.Parse(infos[0]), (path, uint.Parse(infos[1])));
+            }
+
+            foreach (var infos in sortPaths)
+            {
+                gifski.AddFrame(infos.Value.path, infos.Key, infos.Value.ipts);
+                // 如果内存占用过大，根据情况设计一下阻塞线程
+                //Thread.Sleep(30);
+            }
+
+            gifski.Stop();
+        }
     }
 }
