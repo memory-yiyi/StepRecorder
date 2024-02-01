@@ -231,10 +231,10 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <param name="width">图像宽度最大值</param>
         /// <param name="height">图像高度最大值</param>
         /// <param name="quality">图像质量</param>
-        /// <param name="fast">图像编码速度</param>
-        /// <param name="repeat">设置 Gif 循环模式。负数禁止、0永远、正数指定次数</param>
+        /// <param name="fast">图像编码速度。可能的错误：此选项无效</param>
+        /// <param name="repeat">设置 Gif 循环模式。未知错误：此选项无效。保留</param>
         /// <exception cref="InvalidOperationException"></exception>
-        internal void Start(string outfilePath, uint width, uint height, byte quality, bool fast = false, short repeat = -1)
+        internal void Start(string outfilePath, uint width, uint height, byte quality, bool fast = true, short repeat = 0)
         {
             if (gifskiHandle == 0)
             {

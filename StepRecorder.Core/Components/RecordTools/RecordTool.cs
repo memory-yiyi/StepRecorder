@@ -17,11 +17,12 @@ namespace StepRecorder.Core.Components.RecordTools
         private readonly AutoResetEvent _waitToResume = new(false);
         private CancellationTokenSource _waitToSuspend = new();
 
-        private readonly string _framesDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}tmp\\";
-        private readonly string _gifDefaultOutputDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}out\\";
-        private string? _gifDefaultOutputPath;
+        private readonly Thread mergeThread;
+        private static readonly string _framesDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}tmp\\";
+        private static readonly string _gifDefaultOutputDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}out\\";
+        private static string? _gifDefaultOutputPath;
 
-        //private readonly int fps = 10;
+        //private readonly int fps = 8;
         private readonly List<int> keyframeNos = [];
         private int currentFrameNo = 0;
         internal int KeyframeCount { get => keyframeNos.Count; }
@@ -36,6 +37,10 @@ namespace StepRecorder.Core.Components.RecordTools
             recordThread = new Thread(RecordArea)
             {
                 Priority = ThreadPriority.AboveNormal
+            };
+            mergeThread = new Thread(MergeFrames)
+            {
+                Priority = ThreadPriority.BelowNormal
             };
 
             if (Directory.Exists(_framesDirectory))
@@ -54,13 +59,13 @@ namespace StepRecorder.Core.Components.RecordTools
 
         internal void NoteKeyframe(object? sender, EventArgs e) => keyframeNos.Add(currentFrameNo);
 
-        internal void Start() => recordThread.Start();
-
-        internal void Stop()
+        internal void Start()
         {
-            _cts.Cancel();
-            MergeFrames(recordArea.Width, recordArea.Height, _framesDirectory, _gifDefaultOutputDirectory, out _gifDefaultOutputPath);
+            recordThread.Start();
+            mergeThread.Start();
         }
+
+        internal void Stop() => _cts.Cancel();
 
         /// <summary>
         /// 挂起录制线程
@@ -86,6 +91,8 @@ namespace StepRecorder.Core.Components.RecordTools
         private void RecordArea()
         {
             uint index = 0;
+            using Bitmap frame = new(recordArea.Width, recordArea.Height, PixelFormat.Format24bppRgb);
+            using Graphics g = Graphics.FromImage(frame);
             Stopwatch ipts = Stopwatch.StartNew();
 
             while (true)
@@ -99,13 +106,10 @@ namespace StepRecorder.Core.Components.RecordTools
                     ipts.Start();
                 }
 
-                using (Bitmap frame = new(recordArea.Width, recordArea.Height, PixelFormat.Format24bppRgb))
-                {
-                    using Graphics g = Graphics.FromImage(frame);
-                    g.CopyFromScreen(recordArea.Left, recordArea.Top, 0, 0, frame.Size);
-                    frame.Save($"{_framesDirectory}{index++}.{ipts.ElapsedMilliseconds}.png", ImageFormat.Png);
-                }
-
+                g.CopyFromScreen(recordArea.Left, recordArea.Top, 0, 0, frame.Size);
+                // 固定帧率为 8 帧
+                Thread.Sleep(125 - (int)ipts.ElapsedMilliseconds % 125);
+                frame.Save($"{_framesDirectory}{index++}.png", ImageFormat.Png);
                 ++currentFrameNo;
 
                 if (_cts.IsCancellationRequested)
@@ -113,30 +117,26 @@ namespace StepRecorder.Core.Components.RecordTools
             }
         }
 
-        private static void MergeFrames(int width, int height, string framesDirectory, string gifDefaultOutputDirectory, out string gifDefaultOutputPath)
+        private void MergeFrames()
         {
-            gifDefaultOutputPath = $"{gifDefaultOutputDirectory}Steps{DateTime.Now:_yyyyMMdd_HHmmss}.gif";
+            uint index = 0;
+            _gifDefaultOutputPath = $"{_gifDefaultOutputDirectory}Steps{DateTime.Now:_yyyyMMdd_HHmmss}.gif";
             Gifski gifski = new();
-            gifski.Start(gifDefaultOutputPath, (uint)width, (uint)height, 90, true);
-            /*
-             * 为什么不在创建的时候分出一个表?
-             * - 列表增大需要一些时间完成开销，这会给本身帧率就勉强的程序雪上加霜
-             * - 静态也回答了你，这使此函数可以独立，你可以在需要的时候调整它的访问性
-             *       比如：你需要在类外进行合并操作
-             */
-            SortedList<uint, (string path, uint ipts)> sortPaths = [];
+            gifski.Start(_gifDefaultOutputPath, (uint)recordArea.Width, (uint)recordArea.Height, 30);
 
-            foreach (var path in Directory.EnumerateFiles(framesDirectory))
+            // 等待生成第一帧文件
+            Thread.Sleep(200);
+            while (true)
             {
-                var infos = Path.GetRelativePath(framesDirectory, path).Split('.');
-                sortPaths.Add(uint.Parse(infos[0]), (path, uint.Parse(infos[1])));
-            }
-
-            foreach (var infos in sortPaths)
-            {
-                gifski.AddFrame(infos.Value.path, infos.Key, infos.Value.ipts);
-                // 如果内存占用过大，根据情况设计一下阻塞线程
-                //Thread.Sleep(30);
+                if (index != currentFrameNo)
+                    gifski.AddFrame($"{_framesDirectory}{index}.png", index++, index * 125);
+                if (_cts.IsCancellationRequested)
+                    if (index == currentFrameNo)
+                        break;
+                    else
+                    Thread.Sleep(120);
+                else
+                    Thread.Sleep(800);
             }
 
             gifski.Stop();
