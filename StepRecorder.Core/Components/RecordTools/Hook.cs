@@ -1,5 +1,4 @@
 ﻿using StepRecorder.Core.Events;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -107,9 +106,11 @@ namespace StepRecorder.Core.Components.RecordTools
             ++lastListNum;
         }
 
-        internal int GetCurrentKeyframeNum() => inputs.Count;
+        internal int GetCurrentKeyframeCount() => inputs.Count;
 
         [DllImport("user32.dll")]
         private static extern uint GetDoubleClickTime();
+
+        internal string this[int i] => inputs[i];
     }
 }

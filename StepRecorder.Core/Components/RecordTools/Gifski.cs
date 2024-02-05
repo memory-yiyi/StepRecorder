@@ -21,11 +21,11 @@ namespace StepRecorder.Core.Components.RecordTools
             /// <summary>
             /// 如果不是0，则调整宽度的最大值。
             /// </summary>
-            public uint Width { get; init; }
+            public int Width { get; init; }
             /// <summary>
             /// 如果不是0，则调整高度的最大值。请注意，纵横比不会被保留。
             /// </summary>
-            public uint Height { get; init; }
+            public int Height { get; init; }
             /// <summary>
             /// 1-100，但有用的范围是50-100。建议设置为90。
             /// </summary>
@@ -40,7 +40,7 @@ namespace StepRecorder.Core.Components.RecordTools
             public short Repeat { get; init; }
 
             public GifskiSettings() => throw new NotImplementedException("不允许调用无参构造函数");
-            public GifskiSettings(uint width, uint height, byte quality, bool fast, short repeat)
+            public GifskiSettings(int width, int height, byte quality, bool fast, short repeat)
             {
                 if (width == 0 || height == 0 || quality == 0 || quality > 100)
                     throw new ArgumentException("宽度或高度或质量设置异常");
@@ -143,7 +143,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// </param>
         /// <returns>Returns 0 (`GIFSKI_OK`) on success, and non-0 `GIFSKI_*` constant on error.</returns>
         /// <remarks>This function may block and wait until the frame is processed. Make sure to call `gifski_set_write_callback` or `SetFileOutputDelegate` first to avoid a deadlock.</remarks>
-        private delegate GifskiError AddPngFrameDelegate(UIntPtr handle, uint frameNumber, [MarshalAs(UnmanagedType.LPUTF8Str)] string filePath, double presentationTimestamp);
+        private delegate GifskiError AddPngFrameDelegate(UIntPtr handle, int frameNumber, [MarshalAs(UnmanagedType.LPUTF8Str)] string filePath, double presentationTimestamp);
         /// <summary>
         /// 将帧添加到动画中。此函数是异步的。
         /// </summary>
@@ -176,7 +176,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// </remarks>
         /// <see cref="gifski_add_frame_rgba_stride"/>
         /// <seealso cref="gifski_add_frame_rgba"/>
-        //private delegate GifskiError AddRgbFrameDelegate(UIntPtr handle, uint frameNumber, uint width, uint bytesPerRow, uint height, IntPtr pixels, double presentationTimestamp);
+        //private delegate GifskiError AddRgbFrameDelegate(UIntPtr handle, int frameNumber, int width, int bytesPerRow, int height, IntPtr pixels, double presentationTimestamp);
 
         /// <summary>
         /// Start writing to the file at `destination_path` (overwrites if needed).
@@ -234,7 +234,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <param name="fast">图像编码速度。可能的错误：此选项无效</param>
         /// <param name="repeat">设置 Gif 循环模式。未知错误：此选项无效。保留</param>
         /// <exception cref="InvalidOperationException"></exception>
-        internal void Start(string outfilePath, uint width, uint height, byte quality, bool fast = true, short repeat = 0)
+        internal void Start(string outfilePath, int width, int height, byte quality, bool fast = true, short repeat = 0)
         {
             if (gifskiHandle == 0)
             {
@@ -268,7 +268,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <param name="path">图像文件路径</param>
         /// <param name="index">图像在 Gif 文件中的序号</param>
         /// <param name="ipts">图像相对于开始录制时的时间，单位为毫秒</param>
-        internal void AddFrame(string path, uint index, uint ipts) => _addPngFrame(gifskiHandle, index, path, ipts / 1000d);
+        internal void AddFrame(string path, int index, int ipts) => _addPngFrame(gifskiHandle, index, path, ipts / 1000d);
 
         /// <summary>
         /// 增加帧
@@ -276,7 +276,7 @@ namespace StepRecorder.Core.Components.RecordTools
         /// <param name="source">图像像素集</param>
         /// <param name="index">图像在 Gif 文件中的序号</param>
         /// <param name="ipts">图像相对于开始录制时的时间，单位为毫秒</param>
-        //internal void AddFrame(BitmapSource source, uint index, uint ipts)
+        //internal void AddFrame(BitmapSource source, int index, int ipts)
         //{
         //    PixelTool tool = new(source);
         //    tool.HandlePixelInfos();

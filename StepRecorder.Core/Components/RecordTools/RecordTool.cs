@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using StepRecorder.Core.Extensions;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -18,14 +19,11 @@ namespace StepRecorder.Core.Components.RecordTools
         private CancellationTokenSource _waitToSuspend = new();
 
         private readonly Thread mergeThread;
-        private static readonly string _framesDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}tmp\\";
-        private static readonly string _gifDefaultOutputDirectory = $"{AppDomain.CurrentDomain.BaseDirectory}out\\";
-        private static string? _gifDefaultOutputPath;
+        private int currentMergeNo = 0;
 
         //private readonly int fps = 8;
         private readonly List<int> keyframeNos = [];
         private int currentFrameNo = 0;
-        internal int KeyframeCount { get => keyframeNos.Count; }
 
         [SupportedOSPlatform("windows")]
         public RecordTool(Rectangle recordArea)
@@ -43,11 +41,8 @@ namespace StepRecorder.Core.Components.RecordTools
                 Priority = ThreadPriority.BelowNormal
             };
 
-            if (Directory.Exists(_framesDirectory))
-                Directory.Delete(_framesDirectory, true);
-            Directory.CreateDirectory(_framesDirectory);
-            if (!Directory.Exists(_gifDefaultOutputDirectory))
-                Directory.CreateDirectory(_gifDefaultOutputDirectory);
+            SavePath.FramesDirectory.RecreateDirectory();
+            SavePath.DefaultOutputDirectory.CreateDirectory();
         }
 
         ~RecordTool()
@@ -57,10 +52,11 @@ namespace StepRecorder.Core.Components.RecordTools
             _waitToSuspend.Dispose();
         }
 
-        internal void NoteKeyframe(object? sender, EventArgs e) => keyframeNos.Add(currentFrameNo);
+        internal void AddKeyframe(object? sender, EventArgs e) => keyframeNos.Add(currentFrameNo);
 
         internal void Start()
         {
+            SavePath.DefaultOutputPathPrefix = $"{SavePath.DefaultOutputDirectory}Steps{DateTime.Now:_yyyyMMdd_HHmmss}";
             recordThread.Start();
             mergeThread.Start();
         }
@@ -90,7 +86,6 @@ namespace StepRecorder.Core.Components.RecordTools
         [SupportedOSPlatform("windows")]
         private void RecordArea()
         {
-            uint index = 0;
             using Bitmap frame = new(recordArea.Width, recordArea.Height, PixelFormat.Format24bppRgb);
             using Graphics g = Graphics.FromImage(frame);
             Stopwatch ipts = Stopwatch.StartNew();
@@ -109,8 +104,7 @@ namespace StepRecorder.Core.Components.RecordTools
                 g.CopyFromScreen(recordArea.Left, recordArea.Top, 0, 0, frame.Size);
                 // 固定帧率为 8 帧
                 Thread.Sleep(125 - (int)ipts.ElapsedMilliseconds % 125);
-                frame.Save($"{_framesDirectory}{index++}.png", ImageFormat.Png);
-                ++currentFrameNo;
+                frame.Save($"{SavePath.FramesDirectory}{currentFrameNo++}.png", ImageFormat.Png);
 
                 if (_cts.IsCancellationRequested)
                     break;
@@ -119,19 +113,17 @@ namespace StepRecorder.Core.Components.RecordTools
 
         private void MergeFrames()
         {
-            uint index = 0;
-            _gifDefaultOutputPath = $"{_gifDefaultOutputDirectory}Steps{DateTime.Now:_yyyyMMdd_HHmmss}.gif";
             Gifski gifski = new();
-            gifski.Start(_gifDefaultOutputPath, (uint)recordArea.Width, (uint)recordArea.Height, 30);
+            gifski.Start($"{SavePath.DefaultOutputPathPrefix}.gif", recordArea.Width, recordArea.Height, 30);
 
             // 等待生成第一帧文件
             Thread.Sleep(200);
             while (true)
             {
-                if (index != currentFrameNo)
-                    gifski.AddFrame($"{_framesDirectory}{index}.png", index++, index * 125);
+                if (currentMergeNo < currentFrameNo)
+                    gifski.AddFrame($"{SavePath.FramesDirectory}{currentMergeNo}.png", currentMergeNo++, currentMergeNo * 125);
                 if (_cts.IsCancellationRequested)
-                    if (index == currentFrameNo)
+                    if (currentMergeNo >= currentFrameNo)
                         break;
                     else
                     Thread.Sleep(120);
@@ -141,5 +133,11 @@ namespace StepRecorder.Core.Components.RecordTools
 
             gifski.Stop();
         }
+
+        internal void CancelMerge() => currentFrameNo = currentMergeNo;
+
+        internal int GetCurrentMergeCount() => currentMergeNo;
+
+        internal int this[int i] => keyframeNos[i];
     }
 }

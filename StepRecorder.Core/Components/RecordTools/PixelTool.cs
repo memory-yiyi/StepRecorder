@@ -50,9 +50,9 @@ namespace StepRecorder.Core.Components.RecordTools
         private readonly BitmapSource source;
         private WriteableBitmap? data;
 
-        internal uint Width { get; init; }
-        internal uint BytesPerRow { get; private set; }
-        internal uint Height { get; init; }
+        internal int Width { get; init; }
+        internal int BytesPerRow { get; private set; }
+        internal int Height { get; init; }
         private byte[]? pixels;
         private GCHandle pbuf;
         internal IntPtr PixelsAddress { get; private set; }
@@ -61,14 +61,14 @@ namespace StepRecorder.Core.Components.RecordTools
         public PixelTool(BitmapSource source)
         {
             this.source = source;
-            Width = (uint)this.source.PixelWidth;
-            Height = (uint)this.source.PixelHeight;
+            Width = this.source.PixelWidth;
+            Height = this.source.PixelHeight;
         }
 
         internal void HandlePixelInfos()
         {
             // 获取图像色彩深度
-            uint bpp = (uint)source.Format.BitsPerPixel;
+            int bpp = source.Format.BitsPerPixel;
 
             if (bpp != 32 && bpp != 24)
                 throw new InvalidOperationException("仅支持24位或32位图像");
@@ -87,16 +87,15 @@ namespace StepRecorder.Core.Components.RecordTools
              * 不能对齐的部分会填充一些额外的字节，以确保下一行的像素可以从4字节边界开始
              * 此处我们需要的只是像素数据，需要去掉填充字节
              */
-            int bytesPerRow = (int)BytesPerRow;
-            int pad = bytesPerRow & 3;
+            int pad = BytesPerRow & 3;
             pad = pad == 0 ? pad : 4 - pad;
             if (pad == 0)
                 Marshal.Copy(data.BackBuffer, pixels, 0, pixels.Length);
             else
             {
-                int realityBytesPerRow = bytesPerRow + pad;
+                int realityBytesPerRow = BytesPerRow + pad;
                 for (int row = 0; row < Height; ++row)
-                    Marshal.Copy(new IntPtr(data.BackBuffer.ToInt64() + row * realityBytesPerRow), pixels, row * bytesPerRow, bytesPerRow);
+                    Marshal.Copy(new IntPtr(data.BackBuffer.ToInt64() + row * realityBytesPerRow), pixels, row * BytesPerRow, BytesPerRow);
             }
 
             // 固定缓冲区以获取地址供 API 使用

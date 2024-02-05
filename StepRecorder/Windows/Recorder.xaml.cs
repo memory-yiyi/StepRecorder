@@ -1,4 +1,5 @@
-﻿using StepRecorder.Core.Components;
+﻿using Microsoft.Win32;
+using StepRecorder.Core.Components;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -31,7 +32,7 @@ namespace StepRecorder.Windows
         private Recorder()
         {
             areaList = new AreaList();
-            recordState = new RecordState(SendNoteContent);
+            recordState = new RecordState(SendNoteContent, SendSaveInfo);
             InitializeComponent();
             DrawArea.ItemsSource = areaList.AreaInfos;
             this.ShowInTaskbar = false;
@@ -39,6 +40,9 @@ namespace StepRecorder.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            if (Owner.OwnedWindows.Count == 0)
+                Owner.Show();
+            regionWindow?.Close();
             instance = null;
             GC.Collect();
         }
@@ -156,9 +160,28 @@ namespace StepRecorder.Windows
         {
             var noteWindow = new Notes();
             if (noteWindow.ShowDialog() == true)
-                return new RecordState.NoteContent(noteWindow.Short.Text[..], noteWindow.Detail.Text[..]);
+                return new RecordState.NoteContent(noteWindow.Short.Text, noteWindow.Detail.Text);
             else
                 return null;
+        }
+
+        private static string? SendSaveInfo()
+        {
+            var saveFileDialog = new SaveFileDialog
+            {
+                Title = (string)Application.Current.Resources["S.Share.SaveFileDialog.Title"],
+                DefaultDirectory = SavePath.DefaultOutputDirectory,
+                DefaultExt = ".strcd",
+                FileName = SavePath.DefaultOutputPathPrefix![(SavePath.DefaultOutputPathPrefix!.LastIndexOf('\\') + 1)..],
+                Filter = $"{(string)Application.Current.Resources["S.Share.SaveFileDialog.Filter.STRCD"]} (*.strcd)|*.strcd|{(string)Application.Current.Resources["S.Share.SaveFileDialog.Filter.All"]} (*.*)|*.*"
+            };
+            if (saveFileDialog.ShowDialog() == true)
+                return saveFileDialog.FileName;
+            else
+            {
+                instance!.Close();
+                return null;
+            }
         }
         #endregion
 
@@ -166,9 +189,7 @@ namespace StepRecorder.Windows
         {
             if (e.Key == Key.Escape && recordState.GetCurrentState() == "Stop")
             {
-                Owner.Show();
                 this.Close();
-                regionWindow?.Close();
                 e.Handled = true;
             }
         }

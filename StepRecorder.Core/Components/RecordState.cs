@@ -7,7 +7,8 @@ namespace StepRecorder.Core.Components
     /// 记录器的状态类，维护记录器当前运行状态
     /// </summary>
     /// <param name="noteDelegate">一个委托，用于接收从其它类获取的注释帧信息</param>
-    public class RecordState(RecordState.NoteDelegate noteDelegate)
+    /// <param name="getSaveInfo">一个委托，用于接收从其它类获取的有关保存的信息</param>
+    public class RecordState(RecordState.NoteDelegate noteDelegate, RecordState.GetSaveInfoDelegate getSaveInfo)
     {
         #region 状态控制
         private State currentState = new Stop();
@@ -51,7 +52,7 @@ namespace StepRecorder.Core.Components
                 throw new NullReferenceException("未指定录制区域");
             recordTool.Start();
             mkbHook.Install();
-            mkbHook.CatchKeyframe += recordTool.NoteKeyframe;
+            mkbHook.CatchKeyframe += recordTool.AddKeyframe;
         }
 
         internal void PauseRecord()
@@ -69,8 +70,9 @@ namespace StepRecorder.Core.Components
         internal void StopRecord()
         {
             mkbHook.Uninstall();
-            mkbHook.CatchKeyframe -= recordTool!.NoteKeyframe;
+            mkbHook.CatchKeyframe -= recordTool!.AddKeyframe;
             recordTool.Stop();
+            Save();
         }
 
         private RecordTool? recordTool;
@@ -80,8 +82,10 @@ namespace StepRecorder.Core.Components
                 (int)(rect.Top * ProcessInfo.Scaling),
                 (int)(rect.Width * ProcessInfo.Scaling),
                 (int)(rect.Height * ProcessInfo.Scaling)));
+
         #region 键鼠钩子
         public record NoteContent(string Short, string Detail);
+        private record NoteInfo(int KeyframeNum, NoteContent NoteContent);
         /// <summary>
         /// 接收从其它类获取的注释帧信息
         /// </summary>
@@ -89,7 +93,7 @@ namespace StepRecorder.Core.Components
         public delegate NoteContent? NoteDelegate();
 
         private readonly Hook mkbHook = new();
-        private readonly List<(int, NoteContent)> notes = [];
+        private readonly List<NoteInfo> notes = [];
 
         /// <summary>
         /// 设置鼠标不录制区域，默认禁用该设置
@@ -101,13 +105,47 @@ namespace StepRecorder.Core.Components
         /// </summary>
         internal void GetNoteContent()
         {
-            if (noteDelegate.Invoke() is NoteContent nc)
+            if (noteDelegate() is NoteContent nc)
             {
                 mkbHook.RecordNote();
-                notes.Add((mkbHook.GetCurrentKeyframeNum(), nc));
+                notes.Add(new NoteInfo(mkbHook.GetCurrentKeyframeCount(), nc));
             }
         }
         #endregion
+        #endregion
+
+        #region 保存单元
+        /// <summary>
+        /// 接收从其它类获取的有关保存的信息
+        /// </summary>
+        /// <returns>返回 null 时，取消保存</returns>
+        public delegate string? GetSaveInfoDelegate();
+
+        private ProjectFile? projectFile;
+
+        private void Save()
+        {
+            if (getSaveInfo() is string savePath)
+            {
+                projectFile = new ProjectFile(savePath);
+                SaveKeyframes();
+            }
+            else
+                recordTool!.CancelMerge();
+        }
+
+        private void SaveKeyframes()
+        {
+            for (int i = 0; i < mkbHook.GetCurrentKeyframeCount(); i++)
+                projectFile!.Keyframes.Add(new KeyframeInfo(recordTool![i], mkbHook[i]));
+            foreach (var note in notes)
+            {
+                projectFile!.Keyframes[note.KeyframeNum].ShortNote = note.NoteContent.Short;
+                projectFile.Keyframes[note.KeyframeNum].DetailNote = note.NoteContent.Detail;
+                projectFile.Keyframes[note.KeyframeNum].IsKey = false;
+            }
+            projectFile!.KeyframesSerializerToFile();
+        }
         #endregion
     }
 }
