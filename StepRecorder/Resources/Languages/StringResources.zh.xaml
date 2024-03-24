@@ -5,9 +5,10 @@
     <!-- 公共字段 -->
     <s:String x:Key="S.Share.OK">确定</s:String>
     <s:String x:Key="S.Share.Cancel">取消</s:String>
+    <s:String x:Key="S.Share.OpenFileDialog.Title">打开文件</s:String>
     <s:String x:Key="S.Share.SaveFileDialog.Title">保存文件</s:String>
-    <s:String x:Key="S.Share.SaveFileDialog.Filter.STRCD">StepRecorder</s:String>
-    <s:String x:Key="S.Share.SaveFileDialog.Filter.All">所有文件</s:String>
+    <s:String x:Key="S.Share.FileDialog.Filter.STRCD">StepRecorder</s:String>
+    <s:String x:Key="S.Share.FileDialog.Filter.All">所有文件</s:String>
     
     <!-- 程序主界面 -->
     <s:String x:Key="S.Main.Title">Step Recorder - Plus Max Pro</s:String>
@@ -22,6 +23,17 @@
     <s:String x:Key="S.Recorder.Note">注释</s:String>
     <s:String x:Key="S.Recorder.Stop">停止</s:String>
     
+    <!-- 编辑器 -->
+    <s:String x:Key="S.Editor.Title">Step Recorder - 编辑器</s:String>
+    <s:String x:Key="S.Editor.Menu.File">文件</s:String>
+    <s:String x:Key="S.Editor.Menu.File.New">新建</s:String>
+    <s:String x:Key="S.Editor.Menu.File.Open">打开</s:String>
+    <s:String x:Key="S.Editor.Menu.File.Save">保存</s:String>
+    <s:String x:Key="S.Editor.Menu.File.SaveAs">另存为</s:String>
+    <s:String x:Key="S.Editor.Menu.Edit">编辑</s:String>
+    <s:String x:Key="S.Editor.Menu.Edit.Undo">撤销</s:String>
+    <s:String x:Key="S.Editor.Menu.Edit.Redo">重做</s:String>
+
     <!-- 设置 -->
     <s:String x:Key="S.Settings.Title">Step Recorder - 设置</s:String>
     

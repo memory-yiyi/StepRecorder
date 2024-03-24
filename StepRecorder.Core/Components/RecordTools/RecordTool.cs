@@ -41,7 +41,7 @@ namespace StepRecorder.Core.Components.RecordTools
                 Priority = ThreadPriority.BelowNormal
             };
 
-            SavePath.FramesDirectory.RecreateDirectory();
+            SavePath.TempDirectory.RecreateDirectory();
             SavePath.DefaultOutputDirectory.CreateDirectory();
         }
 
@@ -104,7 +104,7 @@ namespace StepRecorder.Core.Components.RecordTools
                 g.CopyFromScreen(recordArea.Left, recordArea.Top, 0, 0, frame.Size);
                 // 固定帧率为 8 帧
                 Thread.Sleep(125 - (int)ipts.ElapsedMilliseconds % 125);
-                frame.Save($"{SavePath.FramesDirectory}{currentFrameNo++}.png", ImageFormat.Png);
+                frame.Save($"{SavePath.TempDirectory}{currentFrameNo++}.png", ImageFormat.Png);
 
                 if (_cts.IsCancellationRequested)
                     break;
@@ -114,14 +114,14 @@ namespace StepRecorder.Core.Components.RecordTools
         private void MergeFrames()
         {
             Gifski gifski = new();
-            gifski.Start($"{SavePath.DefaultOutputPathPrefix}.gif", recordArea.Width, recordArea.Height, 30);
+            gifski.Start(SavePath.TempPathOfGIF, recordArea.Width, recordArea.Height, 30);
 
             // 等待生成第一帧文件
             Thread.Sleep(200);
             while (true)
             {
                 if (currentMergeNo < currentFrameNo)
-                    gifski.AddFrame($"{SavePath.FramesDirectory}{currentMergeNo}.png", currentMergeNo++, currentMergeNo * 125);
+                    gifski.AddFrame($"{SavePath.TempDirectory}{currentMergeNo}.png", currentMergeNo++, currentMergeNo * 125);
                 if (_cts.IsCancellationRequested)
                     if (currentMergeNo >= currentFrameNo)
                         break;
@@ -135,6 +135,8 @@ namespace StepRecorder.Core.Components.RecordTools
         }
 
         internal void CancelMerge() => currentFrameNo = currentMergeNo;
+
+        internal int GetCurrentFrameCount() => currentFrameNo;
 
         internal int GetCurrentMergeCount() => currentMergeNo;
 

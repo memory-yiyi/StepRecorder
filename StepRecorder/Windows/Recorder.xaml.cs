@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using StepRecorder.Core.Components;
+using StepRecorder.Extensions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -40,8 +41,7 @@ namespace StepRecorder.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            if (Owner.OwnedWindows.Count == 0)
-                Owner.Show();
+            this.TryShowOwner();
             regionWindow?.Close();
             instance = null;
             GC.Collect();
@@ -115,6 +115,7 @@ namespace StepRecorder.Windows
 
         #region 录制模块
         private readonly RecordState recordState;
+        private bool isSave;
 
         private void SetButtonEnable(bool record, bool pause, bool note, bool stop)
         {
@@ -151,6 +152,16 @@ namespace StepRecorder.Windows
                         break;
                     case "Note":
                         goto case "Record";
+                    case "Stop":
+                        if (isSave)
+                        {
+                            regionWindow?.Close();
+                            this.Hide();
+                            new Editor() { Owner = this }.Show();
+                        }
+                        else
+                            this.Close();
+                        break;
                 }
                 e.Handled = true;
             }
@@ -165,7 +176,7 @@ namespace StepRecorder.Windows
                 return null;
         }
 
-        private static string? SendSaveInfo()
+        private string? SendSaveInfo()
         {
             var saveFileDialog = new SaveFileDialog
             {
@@ -173,16 +184,22 @@ namespace StepRecorder.Windows
                 DefaultDirectory = SavePath.DefaultOutputDirectory,
                 DefaultExt = ".strcd",
                 FileName = SavePath.DefaultOutputPathPrefix![(SavePath.DefaultOutputPathPrefix!.LastIndexOf('\\') + 1)..],
-                Filter = $"{(string)Application.Current.Resources["S.Share.SaveFileDialog.Filter.STRCD"]} (*.strcd)|*.strcd|{(string)Application.Current.Resources["S.Share.SaveFileDialog.Filter.All"]} (*.*)|*.*"
+                Filter = $"{(string)Application.Current.Resources["S.Share.FileDialog.Filter.STRCD"]} (*.strcd)|*.strcd|{(string)Application.Current.Resources["S.Share.FileDialog.Filter.All"]} (*.*)|*.*"
             };
             if (saveFileDialog.ShowDialog() == true)
+            {
+                isSave = true;
                 return saveFileDialog.FileName;
+            }
             else
             {
-                instance!.Close();
+                isSave = false;
                 return null;
             }
         }
+
+        internal ProjectFile GetProjectFile() => recordState.ProjectFile!;
+        internal double GetSaveProgress() => recordState.GetSaveProgress();
         #endregion
 
         private void Window_KeyDown(object sender, KeyEventArgs e)

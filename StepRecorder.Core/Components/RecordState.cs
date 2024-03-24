@@ -83,9 +83,9 @@ namespace StepRecorder.Core.Components
                 (int)(rect.Width * ProcessInfo.Scaling),
                 (int)(rect.Height * ProcessInfo.Scaling)));
 
-        #region 键鼠钩子
+        #region 钩子
         public record NoteContent(string Short, string Detail);
-        private record NoteInfo(int KeyframeNum, NoteContent NoteContent);
+        private record NoteInfo(int KeyframeNo, NoteContent NoteContent);
         /// <summary>
         /// 接收从其它类获取的注释帧信息
         /// </summary>
@@ -121,30 +121,46 @@ namespace StepRecorder.Core.Components
         /// <returns>返回 null 时，取消保存</returns>
         public delegate string? GetSaveInfoDelegate();
 
-        private ProjectFile? projectFile;
+        public ProjectFile? ProjectFile { get; private set; }
 
         private void Save()
         {
             if (getSaveInfo() is string savePath)
-            {
-                projectFile = new ProjectFile(savePath);
-                SaveKeyframes();
-            }
+                ProjectFile = new ProjectFile(savePath, SaveKeyframes());
             else
                 recordTool!.CancelMerge();
         }
 
-        private void SaveKeyframes()
+        private List<KeyframeInfo> SaveKeyframes()
         {
-            for (int i = 0; i < mkbHook.GetCurrentKeyframeCount(); i++)
-                projectFile!.Keyframes.Add(new KeyframeInfo(recordTool![i], mkbHook[i]));
+            List<KeyframeInfo> keyframes = [];
+            for (int i = 0; i < mkbHook.GetCurrentKeyframeCount(); ++i)
+                keyframes.Add(new KeyframeInfo(recordTool![i], mkbHook[i]));
             foreach (var note in notes)
             {
-                projectFile!.Keyframes[note.KeyframeNum].ShortNote = note.NoteContent.Short;
-                projectFile.Keyframes[note.KeyframeNum].DetailNote = note.NoteContent.Detail;
-                projectFile.Keyframes[note.KeyframeNum].IsKey = false;
+                keyframes[note.KeyframeNo].ShortNote = note.NoteContent.Short;
+                keyframes[note.KeyframeNo].DetailNote = note.NoteContent.Detail;
+                keyframes[note.KeyframeNo].IsKey = false;
             }
-            projectFile!.KeyframesSerializerToFile();
+            return keyframes;
+        }
+
+        public bool SaveProjectFile()
+        {
+            if (recordTool!.GetCurrentMergeCount() == recordTool.GetCurrentFrameCount())
+            {
+                Thread.Sleep(1000);     // 给 RecordTool 关闭文件的时间
+                ProjectFile!.SaveFromRecord();
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public double GetSaveProgress()
+        {
+            _ = SaveProjectFile();
+            return (double)recordTool!.GetCurrentMergeCount() / recordTool.GetCurrentFrameCount();
         }
         #endregion
     }

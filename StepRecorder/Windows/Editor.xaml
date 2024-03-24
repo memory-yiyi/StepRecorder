@@ -1,0 +1,85 @@
+﻿<Window x:Class="StepRecorder.Windows.Editor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="{DynamicResource S.Editor.Title}" Height="800" Width="1400" WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded" Closed="Window_Closed">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <Menu FontSize="20">
+            <MenuItem Header="{DynamicResource S.Editor.Menu.File}">
+                <MenuItem Header="{DynamicResource S.Editor.Menu.File.New}"/>
+                <MenuItem Header="{DynamicResource S.Editor.Menu.File.Open}" Click="File_Open"/>
+                <MenuItem Header="{DynamicResource S.Editor.Menu.File.Save}"/>
+                <MenuItem Header="{DynamicResource S.Editor.Menu.File.SaveAs}"/>
+            </MenuItem>
+            <MenuItem Header="{DynamicResource S.Editor.Menu.Edit}">
+                <MenuItem Header="{DynamicResource S.Editor.Menu.Edit.Undo}"/>
+                <MenuItem Header="{DynamicResource S.Editor.Menu.Edit.Redo}"/>
+            </MenuItem>
+        </Menu>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="11*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Image/>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock>hjhj</TextBlock>
+            </Grid>
+        </Grid>
+
+        <StatusBar Grid.Row="2">
+            <StatusBarItem Name="ReservedSpace" Width="70"/>
+            <StatusBarItem>
+                <Button Name="PreviousKeyframe" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <Button Name="PreviousFrame" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <Button Name="Play" Height="32" Width="{Binding ElementName=Play,Path=Height}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <Button Name="Replay" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <Button Name="Pause" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <Button Name="Stop" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <Button Name="NextFrame" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <Button Name="NextKeyframe" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
+            </StatusBarItem>
+            <StatusBarItem Width="{Binding ElementName=ReservedSpace,Path=Width}"/>
+            <Separator/>
+            <StatusBarItem Width="{Binding ElementName=ReservedSpace,Path=Width}"/>
+            <StatusBarItem>
+                <ProgressBar Name="Progress" Height="{Binding ElementName=Play,Path=Height}" Width="200"
+                             Maximum="1" LargeChange="0.1" SmallChange="0.01"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock Name="CurrentStatus" FontSize="20">this is a test</TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
