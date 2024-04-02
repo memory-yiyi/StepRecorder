@@ -3,12 +3,22 @@
     /// <summary>
     /// 关键帧信息
     /// </summary>
-    public class KeyframeInfo(int index, string inputContent, string? shortNote=null, string? detailNote=null, bool? isKey=null)
+    /// <param name="index">当前关键帧在所有关键帧中的位置</param>
+    /// <param name="frameIndex">当前关键帧在所有帧中的位置</param>
+    /// <param name="inputContent">操作代码</param>
+    /// <param name="shortNote">概要描述</param>
+    /// <param name="detailNote">详细描述</param>
+    /// <param name="isKey">关注度，默认最低</param>
+    public class KeyframeInfo(int index, int frameIndex, string inputContent, string? shortNote=null, string? detailNote=null, bool? isKey=null)
     {
+        /// <summary>
+        /// 序号
+        /// </summary>
+        public int Index { get; set; } = index;
         /// <summary>
         /// 帧序号
         /// </summary>
-        public int Index { get; init; } = index;
+        public int FrameIndex { get; init; } = frameIndex;
         /// <summary>
         /// 键鼠消息
         /// </summary>
@@ -33,6 +43,6 @@
         /// </remarks>
         public bool? IsKey { get; set; } = isKey;
 
-        public KeyframeInfo() : this(-1, "&Error") { }
+        public KeyframeInfo() : this(-1, -1, "&Error") { }
     }
 }

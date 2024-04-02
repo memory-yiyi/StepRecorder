@@ -108,7 +108,7 @@ namespace StepRecorder.Core.Components
             if (noteDelegate() is NoteContent nc)
             {
                 mkbHook.RecordNote();
-                notes.Add(new NoteInfo(mkbHook.GetCurrentKeyframeCount(), nc));
+                notes.Add(new NoteInfo(mkbHook.GetCurrentKeyframeCount() - 1, nc));
             }
         }
         #endregion
@@ -126,7 +126,22 @@ namespace StepRecorder.Core.Components
         private void Save()
         {
             if (getSaveInfo() is string savePath)
+            {
                 ProjectFile = new ProjectFile(savePath, SaveKeyframes());
+                Task.Run(() =>
+                {
+                    while (true)
+                    {
+                        if (recordTool!.GetCurrentMergeCount() == recordTool.GetCurrentFrameCount())
+                        {
+                            Thread.Sleep(1000);     // 给 RecordTool 关闭文件的时间
+                            ProjectFile!.SaveFromRecord();
+                            break;
+                        }
+                        Thread.Sleep(1000);     // 检测间隔
+                    }
+                });
+            }
             else
                 recordTool!.CancelMerge();
         }
@@ -135,7 +150,7 @@ namespace StepRecorder.Core.Components
         {
             List<KeyframeInfo> keyframes = [];
             for (int i = 0; i < mkbHook.GetCurrentKeyframeCount(); ++i)
-                keyframes.Add(new KeyframeInfo(recordTool![i], mkbHook[i]));
+                keyframes.Add(new KeyframeInfo(i + 1, recordTool![i], mkbHook[i]));
             foreach (var note in notes)
             {
                 keyframes[note.KeyframeNo].ShortNote = note.NoteContent.Short;
@@ -145,23 +160,7 @@ namespace StepRecorder.Core.Components
             return keyframes;
         }
 
-        public bool SaveProjectFile()
-        {
-            if (recordTool!.GetCurrentMergeCount() == recordTool.GetCurrentFrameCount())
-            {
-                Thread.Sleep(1000);     // 给 RecordTool 关闭文件的时间
-                ProjectFile!.SaveFromRecord();
-                return true;
-            }
-            else
-                return false;
-        }
-
-        public double GetSaveProgress()
-        {
-            _ = SaveProjectFile();
-            return (double)recordTool!.GetCurrentMergeCount() / recordTool.GetCurrentFrameCount();
-        }
+        public double GetSaveProgress() => (double)recordTool!.GetCurrentMergeCount() / recordTool.GetCurrentFrameCount();
         #endregion
     }
 }

@@ -2,6 +2,7 @@
 using StepRecorder.Core.Components;
 using StepRecorder.Extensions;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace StepRecorder.Windows
 {
@@ -49,6 +50,13 @@ namespace StepRecorder.Windows
             this.TryShowOwner();
         }
 
+        private void Data_Binding()
+        {
+            StatusBar.IsEnabled = true;
+            OperateInfo.ItemsSource = ((ProjectFile)DataContext).GetKeyframeInfo();
+        }
+
+        #region 菜单
         private void File_Open(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
@@ -61,6 +69,69 @@ namespace StepRecorder.Windows
             if (openFileDialog.ShowDialog() == true)
             {
                 DataContext = new ProjectFile(openFileDialog.FileName);
+                Data_Binding();
+            }
+        }
+        #endregion
+
+        private bool flagShortNote = false;
+        private bool flagDetailNote = false;
+
+        private void OperateInfo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Note_LostFocus();
+
+            ((ProjectFile)DataContext).CurrentKeyframeIndex = OperateInfo.SelectedIndex;
+            ShortNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).ShortNote;
+            DetailNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote;
+        }
+
+        private void Note_GotFocus() => UpdateNote.IsEnabled = true;
+
+        private void Note_LostFocus()
+        {
+            UpdateNote.IsEnabled = false;
+            flagShortNote = false;
+            flagDetailNote = false;
+        }
+
+        private void ShortNote_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Note_GotFocus();
+            flagShortNote = true;
+        }
+
+        private void DetailNote_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Note_GotFocus();
+            flagDetailNote = true;
+        }
+
+        private void Ok_Click(object sender, RoutedEventArgs e)
+        {
+            if (flagShortNote)
+            {
+                ((KeyframeInfo)OperateInfo.SelectedItem).ShortNote = ShortNote.Text;
+                flagShortNote = false;
+            }
+            if (flagDetailNote)
+            {
+                ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote = DetailNote.Text;
+                flagDetailNote = false;
+            }
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            if (flagShortNote)
+            {
+                ShortNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).ShortNote;
+                flagShortNote = false;
+            }
+            if (flagDetailNote)
+            {
+                DetailNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote;
+                flagDetailNote = false;
             }
         }
     }

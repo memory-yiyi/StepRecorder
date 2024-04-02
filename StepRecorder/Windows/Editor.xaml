@@ -31,55 +31,117 @@
                 <ColumnDefinition Width="11*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            
-            <Image/>
+
+            <Image Name="Screen"/>
 
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                
-                <TextBlock>hjhj</TextBlock>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Style="{DynamicResource T.KeyframeListTitle}">
+                        <TextBlock Name="Index" Text="{DynamicResource S.Editor.Context.Index}" Width="60"/>
+                        <TextBlock Name="FrameIndex" Text="{DynamicResource S.Editor.Context.FrameIndex}" Width="60"/>
+                        <TextBlock Name="Operation" Text="{DynamicResource S.Editor.Context.Operation}" Width="60"/>
+                    </StackPanel>
+
+                    <ListBox Name="OperateInfo" Grid.Row="1" SelectedIndex="0" SelectionChanged="OperateInfo_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Style="{DynamicResource T.KeyframeListContext}">
+                                    <TextBlock Text="{Binding Path=Index}" Width="{Binding ElementName=Index,Path=Width}"/>
+                                    <TextBlock Text="{Binding Path=FrameIndex}" Width="{Binding ElementName=FrameIndex,Path=Width}"/>
+                                    <TextBlock Text="{Binding Path=InputContent}" Width="{Binding ElementName=Operation,Path=Width}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+
+                <UniformGrid Rows="2" Grid.Row="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="{DynamicResource S.Editor.Context.Note.Short}" Style="{DynamicResource T.NoteTitle}"/>
+                        <TextBox Name="ShortNote" Text="this is a test" Grid.Row="1" Style="{DynamicResource T.NoteContext}"
+                                 GotFocus="ShortNote_GotFocus"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="{DynamicResource S.Editor.Context.Note.Detail}" Style="{DynamicResource T.NoteTitle}"/>
+                        <TextBox Name="DetailNote" Text="this is a test" Grid.Row="1" Style="{DynamicResource T.NoteContext}"
+                                 GotFocus="DetailNote_GotFocus"/>
+                    </Grid>
+                </UniformGrid>
             </Grid>
         </Grid>
 
-        <StatusBar Grid.Row="2">
-            <StatusBarItem Name="ReservedSpace" Width="70"/>
-            <StatusBarItem>
-                <Button Name="PreviousKeyframe" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <Button Name="PreviousFrame" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <Button Name="Play" Height="32" Width="{Binding ElementName=Play,Path=Height}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <Button Name="Replay" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <Button Name="Pause" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <Button Name="Stop" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <Button Name="NextFrame" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <Button Name="NextKeyframe" Height="{Binding ElementName=Play,Path=Height}" Width="{Binding ElementName=Play,Path=Height}"/>
-            </StatusBarItem>
-            <StatusBarItem Width="{Binding ElementName=ReservedSpace,Path=Width}"/>
-            <Separator/>
-            <StatusBarItem Width="{Binding ElementName=ReservedSpace,Path=Width}"/>
-            <StatusBarItem>
-                <ProgressBar Name="Progress" Height="{Binding ElementName=Play,Path=Height}" Width="200"
-                             Maximum="1" LargeChange="0.1" SmallChange="0.01"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <TextBlock Name="CurrentStatus" FontSize="20">this is a test</TextBlock>
-            </StatusBarItem>
-        </StatusBar>
+        <Grid Name="StatusBar" Grid.Row="2" Background="#FFF1EDED" IsEnabled="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="11*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="64"/>
+                    <ColumnDefinition Width="320"/>
+                    <ColumnDefinition Width="64"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <UniformGrid Rows="1" Grid.Column="1">
+                    <Button Name="PreviousKeyframe" Content="▲" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="PreviousFrame" Content="◀" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="Play" Content="▷" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="Replay" Content="↺" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="Pause" Content="=" Style="{DynamicResource T.StatusButton}" RenderTransformOrigin="0.5,0.5">
+                        <Button.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="90"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Button.RenderTransform>
+                    </Button>
+                    <Button Name="Stop" Content="▢" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="NextFrame" Content="▶" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="NextKeyframe" Content="▼" Style="{DynamicResource T.StatusButton}"/>
+                </UniformGrid>
+
+                <ProgressBar Name="Progress" Height="{Binding ElementName=Play,Path=Height}"
+                             Maximum="1" LargeChange="0.1" SmallChange="0.01" Grid.Column="3"/>
+
+                <TextBlock Name="CurrentStatus" Text="this is a test" FontSize="20"
+                           Grid.Column="4" VerticalAlignment="Center" Margin="8,0,0,0"/>
+            </Grid>
+
+            <UniformGrid Rows="1" Grid.Column="1">
+                <UniformGrid Rows="1">
+                    <Button Name="Add" Content="+" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="Delete" Content="-" Style="{DynamicResource T.StatusButton}"/>
+                </UniformGrid>
+                <UniformGrid Name="UpdateNote" Rows="1" IsEnabled="False">
+                    <Button Name="Ok" Content="✓" Style="{DynamicResource T.StatusButton}" Click="Ok_Click"/>
+                    <Button Name="Cancel" Content="✕" Style="{DynamicResource T.StatusButton}" Click="Cancel_Click"/>
+                </UniformGrid>
+            </UniformGrid>
+        </Grid>
     </Grid>
 </Window>

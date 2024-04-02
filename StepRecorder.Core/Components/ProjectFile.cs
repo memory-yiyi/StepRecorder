@@ -28,9 +28,11 @@ namespace StepRecorder.Core.Components
 
         internal void SaveFromRecord()
         {
+            // COPY_XmlSerialize(1)
             using MemoryStream mStream = new();
             new XmlSerializer(typeof(KeyframesInfo)).Serialize(mStream, keyframes);
             mStream.Position = 0;
+            // endCOPY_XmlSerialize
             using (FileStream fStream = new(Path, FileMode.Create, FileAccess.Write))
             {
                 using TarWriter tarWriter = new(fStream);
@@ -38,10 +40,18 @@ namespace StepRecorder.Core.Components
                 tarWriter.WriteEntry(SavePath.TempPathOfGIF, SavePath.TarEntryNameOfGIF);
             }
 
-            Load(false);
+            Load(flagXML: false);
         }
 
-        internal void Save() { }
+        public void Save()
+        {
+            // COPY_XmlSerialize(1)
+            using MemoryStream mStream = new();
+            new XmlSerializer(typeof(KeyframesInfo)).Serialize(mStream, keyframes);
+            mStream.Position = 0;
+            // endCOPY_XmlSerialize
+
+        }
 
         internal void SerializeKeyframesToFile()
         {
@@ -83,7 +93,7 @@ namespace StepRecorder.Core.Components
         #endregion
 
         #region 关键帧
-        public int CurrentKeyframeIndex { get; set; } = 0;
+        public int CurrentKeyframeIndex { get; set; } = -1;
 
         public IEnumerable<KeyframeInfo> GetKeyframeInfo()
         {
