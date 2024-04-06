@@ -76,6 +76,7 @@ namespace StepRecorder.Windows
 
         private bool flagShortNote = false;
         private bool flagDetailNote = false;
+        private bool flagJumpFrame = true;
 
         private void OperateInfo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -84,6 +85,9 @@ namespace StepRecorder.Windows
             ((ProjectFile)DataContext).CurrentKeyframeIndex = OperateInfo.SelectedIndex;
             ShortNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).ShortNote;
             DetailNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote;
+
+            if (flagJumpFrame)
+                Screen.Source = ((ProjectFile)DataContext).FrameAt(((KeyframeInfo)OperateInfo.SelectedItem).FrameIndex);
         }
 
         private void Note_GotFocus() => UpdateNote.IsEnabled = true;

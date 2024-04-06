@@ -1,6 +1,6 @@
 ﻿using System.Formats.Tar;
 using System.IO;
-using System.Windows.Media.Imaging;
+using System.Windows.Media;
 using System.Xml.Serialization;
 using KeyframesInfo = System.Collections.Generic.List<StepRecorder.Core.Components.KeyframeInfo>;
 
@@ -35,7 +35,7 @@ namespace StepRecorder.Core.Components
             // endCOPY_XmlSerialize
             using (FileStream fStream = new(Path, FileMode.Create, FileAccess.Write))
             {
-                using TarWriter tarWriter = new(fStream);
+                using TarWriter tarWriter = new(fStream, TarEntryFormat.Gnu);
                 tarWriter.WriteEntry(new GnuTarEntry(TarEntryType.RegularFile, SavePath.TarEntryNameOfXML) { DataStream = mStream });
                 tarWriter.WriteEntry(SavePath.TempPathOfGIF, SavePath.TarEntryNameOfGIF);
             }
@@ -71,20 +71,21 @@ namespace StepRecorder.Core.Components
 
             while ((currentTarEntry = tarReader.GetNextEntry()) != null)
             {
-                switch (currentTarEntry.Name)
+                GnuTarEntry curGnuTarEntry = new(currentTarEntry);
+                switch (curGnuTarEntry.Name)
                 {
                     case SavePath.TarEntryNameOfXML:
                         if (flagXML)
                         {
-                            keyframes = new XmlSerializer(typeof(KeyframesInfo)).Deserialize(currentTarEntry.DataStream!) as KeyframesInfo ?? [];
+                            keyframes = new XmlSerializer(typeof(KeyframesInfo)).Deserialize(curGnuTarEntry.DataStream!) as KeyframesInfo ?? [];
                         }
                         break;
                     case SavePath.TarEntryNameOfGIF:
                         if (flagGIF)
                         {
-                            currentTarEntry.DataStream!.CopyTo(gifMemoryStream);
+                            curGnuTarEntry.DataStream!.CopyTo(gifMemoryStream);
                             gifMemoryStream.Position = 0;
-                            gifDecoder = new GifBitmapDecoder(gifMemoryStream, BitmapCreateOptions.None, BitmapCacheOption.Default);
+                            gifDecoder = new GifDecoder(gifMemoryStream);
                         }
                         break;
                 }
@@ -104,7 +105,7 @@ namespace StepRecorder.Core.Components
 
         #region 帧
         private int currentFrameIndex = 0;
-        private GifBitmapDecoder? gifDecoder;
+        private GifDecoder? gifDecoder;
         public int CurrentFrameIndex
         {
             get => currentFrameIndex;
@@ -114,17 +115,17 @@ namespace StepRecorder.Core.Components
                     throw new InvalidOperationException("未加载文件");
                 else if (currentFrameIndex < 0)
                     currentFrameIndex = 0;
-                else if (currentFrameIndex > gifDecoder.Frames.Count)
-                    currentFrameIndex = gifDecoder.Frames.Count;
+                else if (currentFrameIndex > gifDecoder.FrameCount)
+                    currentFrameIndex = gifDecoder.FrameCount;
                 else
                     currentFrameIndex = value;
             }
         }
 
-        public IEnumerable<BitmapFrame> GetFrame()
+        public ImageSource? FrameAt(int frameIndex)
         {
-            foreach (BitmapFrame frame in gifDecoder!.Frames)
-                yield return frame;
+            CurrentFrameIndex = frameIndex;
+            return gifDecoder!.FrameAt(CurrentFrameIndex);
         }
         #endregion
     }
