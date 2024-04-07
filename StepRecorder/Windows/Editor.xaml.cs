@@ -49,7 +49,9 @@ namespace StepRecorder.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            ((ProjectFile)DataContext).Dispose();
             this.TryShowOwner();
+            GC.Collect();
         }
 
         #region 菜单
