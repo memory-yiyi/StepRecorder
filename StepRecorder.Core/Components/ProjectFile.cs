@@ -21,6 +21,7 @@ namespace StepRecorder.Core.Components
         ~ProjectFile()
         {
             gifMemoryStream.Dispose();
+            gifDecoder?.Dispose();
         }
 
         #region 保存
@@ -94,12 +95,15 @@ namespace StepRecorder.Core.Components
         #endregion
 
         #region 关键帧
-        public int CurrentKeyframeIndex { get; set; } = -1;
+        public int CurrentKeyframeIndex { get; private set; } = -1;
 
         public IEnumerable<KeyframeInfo> GetKeyframeInfo()
         {
             foreach (KeyframeInfo info in keyframes)
+            {
+                CurrentKeyframeIndex = info.Index - 1;
                 yield return info;
+            }
         }
         #endregion
 
@@ -109,18 +113,19 @@ namespace StepRecorder.Core.Components
         public int CurrentFrameIndex
         {
             get => currentFrameIndex;
-            set
+            private set
             {
                 if (gifDecoder == null)
                     throw new InvalidOperationException("未加载文件");
-                else if (currentFrameIndex < 0)
+                else if (value < 0)
                     currentFrameIndex = 0;
-                else if (currentFrameIndex > gifDecoder.FrameCount)
-                    currentFrameIndex = gifDecoder.FrameCount;
+                else if (value >= gifDecoder.FrameCount)
+                    currentFrameIndex = gifDecoder.FrameCount - 1;
                 else
                     currentFrameIndex = value;
             }
         }
+        public int FrameCount { get => gifDecoder?.FrameCount ?? -1; }
 
         public ImageSource? FrameAt(int frameIndex)
         {

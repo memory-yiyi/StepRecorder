@@ -47,12 +47,12 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Style="{DynamicResource T.KeyframeListTitle}">
-                        <TextBlock Name="Index" Text="{DynamicResource S.Editor.Context.Index}" Width="60"/>
-                        <TextBlock Name="FrameIndex" Text="{DynamicResource S.Editor.Context.FrameIndex}" Width="60"/>
-                        <TextBlock Name="Operation" Text="{DynamicResource S.Editor.Context.Operation}" Width="60"/>
+                        <TextBlock Name="Index" Text="{DynamicResource S.Editor.Context.Index}" Width="50"/>
+                        <TextBlock Name="FrameIndex" Text="{DynamicResource S.Editor.Context.FrameIndex}" Width="50"/>
+                        <TextBlock Name="Operation" Text="{DynamicResource S.Editor.Context.Operation}" Width="200"/>
                     </StackPanel>
 
-                    <ListBox Name="OperateInfo" Grid.Row="1" SelectedIndex="0" SelectionChanged="OperateInfo_SelectionChanged">
+                    <ListBox Name="OperateInfo" Grid.Row="1" SelectionChanged="OperateInfo_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Style="{DynamicResource T.KeyframeListContext}">
@@ -73,7 +73,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Text="{DynamicResource S.Editor.Context.Note.Short}" Style="{DynamicResource T.NoteTitle}"/>
-                        <TextBox Name="ShortNote" Text="this is a test" Grid.Row="1" Style="{DynamicResource T.NoteContext}"
+                        <TextBox Name="ShortNote" Grid.Row="1" Style="{DynamicResource T.NoteContext}"
                                  GotFocus="ShortNote_GotFocus"/>
                     </Grid>
                     <Grid>
@@ -83,7 +83,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Text="{DynamicResource S.Editor.Context.Note.Detail}" Style="{DynamicResource T.NoteTitle}"/>
-                        <TextBox Name="DetailNote" Text="this is a test" Grid.Row="1" Style="{DynamicResource T.NoteContext}"
+                        <TextBox Name="DetailNote" Grid.Row="1" Style="{DynamicResource T.NoteContext}"
                                  GotFocus="DetailNote_GotFocus"/>
                     </Grid>
                 </UniformGrid>
@@ -105,12 +105,12 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <UniformGrid Rows="1" Grid.Column="1">
-                    <Button Name="PreviousKeyframe" Content="▲" Style="{DynamicResource T.StatusButton}"/>
-                    <Button Name="PreviousFrame" Content="◀" Style="{DynamicResource T.StatusButton}"/>
-                    <Button Name="Play" Content="▷" Style="{DynamicResource T.StatusButton}"/>
-                    <Button Name="Replay" Content="↺" Style="{DynamicResource T.StatusButton}"/>
-                    <Button Name="Pause" Content="=" Style="{DynamicResource T.StatusButton}" RenderTransformOrigin="0.5,0.5">
+                <UniformGrid Name="Media" Rows="1" Grid.Column="1" IsEnabled="False">
+                    <Button Name="PreviousKeyframe" Content="▲" Style="{DynamicResource T.StatusButton}" Click="PreviousKeyframe_Click"/>
+                    <Button Name="PreviousFrame" Content="◀" Style="{DynamicResource T.StatusButton}" Click="PreviousFrame_Click"/>
+                    <Button Name="Play" Content="▷" Style="{DynamicResource T.StatusButton}" Click="Play_Click"/>
+                    <Button Name="Replay" Content="↺" Style="{DynamicResource T.StatusButton}" Click="Replay_Click"/>
+                    <Button Name="Pause" Content="=" Style="{DynamicResource T.StatusButton}" Click="Pause_Click" RenderTransformOrigin="0.5,0.5">
                         <Button.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform/>
@@ -120,15 +120,15 @@
                             </TransformGroup>
                         </Button.RenderTransform>
                     </Button>
-                    <Button Name="Stop" Content="▢" Style="{DynamicResource T.StatusButton}"/>
-                    <Button Name="NextFrame" Content="▶" Style="{DynamicResource T.StatusButton}"/>
-                    <Button Name="NextKeyframe" Content="▼" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="Stop" Content="▢" Style="{DynamicResource T.StatusButton}" Click="Stop_Click"/>
+                    <Button Name="NextFrame" Content="▶" Style="{DynamicResource T.StatusButton}" Click="NextFrame_Click"/>
+                    <Button Name="NextKeyframe" Content="▼" Style="{DynamicResource T.StatusButton}" Click="NextKeyframe_Click"/>
                 </UniformGrid>
 
                 <ProgressBar Name="Progress" Height="{Binding ElementName=Play,Path=Height}"
                              Maximum="1" LargeChange="0.1" SmallChange="0.01" Grid.Column="3"/>
 
-                <TextBlock Name="CurrentStatus" Text="this is a test" FontSize="20"
+                <TextBlock Name="CurrentStatus" Text="{DynamicResource S.Editor.Context.InitTip}" FontSize="20"
                            Grid.Column="4" VerticalAlignment="Center" Margin="8,0,0,0"/>
             </Grid>
 

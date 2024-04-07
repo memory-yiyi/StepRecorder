@@ -34,10 +34,11 @@
     <s:String x:Key="S.Editor.Menu.Edit.Undo">撤销</s:String>
     <s:String x:Key="S.Editor.Menu.Edit.Redo">重做</s:String>
     <s:String x:Key="S.Editor.Context.Index">序号</s:String>
-    <s:String x:Key="S.Editor.Context.FrameIndex">帧</s:String>
+    <s:String x:Key="S.Editor.Context.FrameIndex">索引</s:String>
     <s:String x:Key="S.Editor.Context.Operation">操作</s:String>
     <s:String x:Key="S.Editor.Context.Note.Short">概要描述</s:String>
     <s:String x:Key="S.Editor.Context.Note.Detail">详细描述</s:String>
+    <s:String x:Key="S.Editor.Context.InitTip">打开一个项目文件以查看与编辑</s:String>
 
     <!-- 设置 -->
     <s:String x:Key="S.Settings.Title">Step Recorder - 设置</s:String>

@@ -94,7 +94,7 @@ namespace StepRecorder.Core.Components
         #endregion
 
         #region 构造函数
-        private GifDecoder(object obj, int cacheSize = 16, int cacheCount = 2)
+        private GifDecoder(object obj, int cacheSize = 4, int cacheCount = 6)
         {
             if (obj is string filePath)
                 image = Image.FromFile(filePath);
@@ -133,7 +133,7 @@ namespace StepRecorder.Core.Components
             {
                 if (index >= baseFrameIndex + cacheSize)
                 {
-                    int indexAdd = (index - baseFrameIndex + 1) / cacheSize;       // +1 此处为数量，没有时为索引
+                    int indexAdd = (index - baseFrameIndex) / cacheSize;
                     int loopIndex = currentCacheIndex;
                     currentCacheIndex = (currentCacheIndex + indexAdd) % cacheCount;
                     baseFrameIndex += indexAdd * cacheSize;

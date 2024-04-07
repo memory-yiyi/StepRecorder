@@ -3,6 +3,7 @@ using StepRecorder.Core.Components;
 using StepRecorder.Extensions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace StepRecorder.Windows
 {
@@ -14,6 +15,7 @@ namespace StepRecorder.Windows
         public Editor()
         {
             InitializeComponent();
+            timer.Tick += Timer_Tick;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -50,15 +52,12 @@ namespace StepRecorder.Windows
             this.TryShowOwner();
         }
 
-        private void Data_Binding()
-        {
-            StatusBar.IsEnabled = true;
-            OperateInfo.ItemsSource = ((ProjectFile)DataContext).GetKeyframeInfo();
-        }
-
         #region 菜单
+        private bool flagLoading = true;
+
         private void File_Open(object sender, RoutedEventArgs e)
         {
+            flagLoading = true;
             var openFileDialog = new OpenFileDialog
             {
                 Title = (string)Application.Current.Resources["S.Share.OpenFileDialog.Title"],
@@ -68,26 +67,43 @@ namespace StepRecorder.Windows
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                DataContext = new ProjectFile(openFileDialog.FileName);
-                Data_Binding();
+                ProjectFile pf = new(openFileDialog.FileName);
+                DataContext = pf;
+
+                StatusBar.IsEnabled = true;
+                Media.IsEnabled = true;
+                OperateInfo.ItemsSource = pf.GetKeyframeInfo();
+                FrameAt(pf.CurrentFrameIndex);
             }
+            flagLoading = false;
         }
         #endregion
 
+        #region 导航区
         private bool flagShortNote = false;
         private bool flagDetailNote = false;
         private bool flagJumpFrame = true;
 
         private void OperateInfo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (flagLoading)
+                return;
+
             Note_LostFocus();
 
-            ((ProjectFile)DataContext).CurrentKeyframeIndex = OperateInfo.SelectedIndex;
-            ShortNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).ShortNote;
-            DetailNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote;
+            if (OperateInfo.SelectedItem is KeyframeInfo kfi)
+            {
+            ShortNote.Text = kfi.ShortNote;
+            DetailNote.Text = kfi.DetailNote;
 
             if (flagJumpFrame)
-                Screen.Source = ((ProjectFile)DataContext).FrameAt(((KeyframeInfo)OperateInfo.SelectedItem).FrameIndex);
+                FrameAt(kfi.FrameIndex);
+        }
+            else
+            {
+                ShortNote.Text = string.Empty;
+                DetailNote.Text = string.Empty;
+            }
         }
 
         private void Note_GotFocus() => UpdateNote.IsEnabled = true;
@@ -138,5 +154,69 @@ namespace StepRecorder.Windows
                 flagDetailNote = false;
             }
         }
+        #endregion
+
+        #region 多媒体区
+        private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(125) };        // 对于时间间隔如果有需要，请调整录制工具（RecordTool.cs）并进行调用
+
+        private void FrameAt(int frameIndex)
+        {
+            ProjectFile pf = (ProjectFile)DataContext;
+            Screen.Source = pf.FrameAt(frameIndex);
+            int cfi = pf.CurrentFrameIndex;
+            int fc = pf.FrameCount - 1;
+            Progress.Value = (double)cfi / fc;
+            CurrentStatus.Text = $"{cfi}/{fc}";
+        }
+
+        private void FrameNext()
+        {
+            flagJumpFrame = false;
+            ProjectFile pf = (ProjectFile)DataContext;
+            int cfi = pf.CurrentFrameIndex + 1;
+            if (OperateInfo.SelectedIndex + 1 < OperateInfo.Items.Count && ((KeyframeInfo)OperateInfo.Items[OperateInfo.SelectedIndex + 1]).FrameIndex == cfi)
+                ++OperateInfo.SelectedIndex;
+            FrameAt(cfi);
+            if (pf.CurrentFrameIndex == pf.FrameCount - 1)
+                timer.Stop();
+            flagJumpFrame = true;
+        }
+
+        private void PreviousKeyframe_Click(object sender, RoutedEventArgs e) => OperateInfo.SelectedIndex = OperateInfo.SelectedIndex <= 0 ? 0 : --OperateInfo.SelectedIndex;
+
+        private void NextKeyframe_Click(object sender, RoutedEventArgs e) => OperateInfo.SelectedIndex = OperateInfo.SelectedIndex >= OperateInfo.Items.Count ? OperateInfo.Items.Count : ++OperateInfo.SelectedIndex;
+
+        private void PreviousFrame_Click(object sender, RoutedEventArgs e)
+        {
+            int cfi = ((ProjectFile)DataContext).CurrentFrameIndex - 1;
+            if (OperateInfo.SelectedIndex - 1 > 0 && ((KeyframeInfo)OperateInfo.Items[OperateInfo.SelectedIndex - 1]).FrameIndex == cfi)
+                --OperateInfo.SelectedIndex;
+            FrameAt(cfi);       // 如果有需要，请调整解码器（GifDecoder.cs），使其保留两个向后的缓存
+        }
+
+        private void NextFrame_Click(object sender, RoutedEventArgs e) => FrameNext();
+
+        private void Timer_Tick(object? sender, EventArgs e) => FrameNext();
+
+        private void Play_Click(object sender, RoutedEventArgs e) => timer.Start();
+
+        private void Replay_Click(object sender, RoutedEventArgs e)
+        {
+            OperateInfo.SelectedIndex = -1;
+            FrameAt(0);
+            timer.Start();
+        }
+
+        private void Pause_Click(object sender, RoutedEventArgs e) => timer.Stop();
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            flagJumpFrame = false;
+            timer.Stop();
+            OperateInfo.SelectedIndex = OperateInfo.Items.Count - 1;
+            FrameAt(((ProjectFile)DataContext).FrameCount);
+            flagJumpFrame = true;
+        }
+        #endregion
     }
 }
