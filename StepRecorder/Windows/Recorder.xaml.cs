@@ -178,6 +178,7 @@ namespace StepRecorder.Windows
 
         private string? SendSaveInfo()
         {
+            // COPY_SaveFile(1)
             var saveFileDialog = new SaveFileDialog
             {
                 Title = (string)Application.Current.Resources["S.Share.SaveFileDialog.Title"],
@@ -186,6 +187,7 @@ namespace StepRecorder.Windows
                 FileName = SavePath.DefaultOutputPathPrefix![(SavePath.DefaultOutputPathPrefix!.LastIndexOf('\\') + 1)..],
                 Filter = $"{(string)Application.Current.Resources["S.Share.FileDialog.Filter.STRCD"]} (*.strcd)|*.strcd|{(string)Application.Current.Resources["S.Share.FileDialog.Filter.All"]} (*.*)|*.*"
             };
+            // endCOPY_SaveFile
             if (saveFileDialog.ShowDialog() == true)
             {
                 isSave = true;

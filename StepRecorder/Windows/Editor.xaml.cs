@@ -12,6 +12,8 @@ namespace StepRecorder.Windows
     /// </summary>
     public partial class Editor : Window
     {
+        private ProjectFile? projectFile; 
+
         public Editor()
         {
             InitializeComponent();
@@ -20,12 +22,13 @@ namespace StepRecorder.Windows
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            UIStatus_UnLoadedFile();
             if (Owner is Recorder recorder)
             {
                 flagLoading = true;
-                File.IsEnabled = false;
-                DataContext = recorder.GetProjectFile();
-                OperateInfo.ItemsSource = ((ProjectFile)DataContext).GetKeyframeInfo();
+                UIStatus_LoadingFileFromRecord();
+                projectFile = recorder.GetProjectFile();
+                OperateInfo.ItemsSource = projectFile.GetKeyframeInfo();
                 Task.Run(() =>
                 {
                     while (true)
@@ -50,11 +53,8 @@ namespace StepRecorder.Windows
 
                     this.Dispatcher.Invoke(() =>
                     {
-                        ProjectFile pf = (ProjectFile)DataContext;
-                        SB_MediaControl.IsEnabled = true;
-                        SB_AlterNote.IsEnabled = true;
-                        FrameAt(((ProjectFile)DataContext).CurrentFrameIndex);
-                        File.IsEnabled = true;
+                        FrameAt(projectFile.CurrentFrameIndex);
+                        UIStatus_LoadedFile();
                         flagLoading = false;
                     });
                 });
@@ -63,13 +63,49 @@ namespace StepRecorder.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            ((ProjectFile)DataContext)?.Dispose();
+            projectFile?.Dispose();
             this.TryShowOwner();
             GC.Collect();
         }
 
+        #region UI可用性控制
+        private void UIStatus_UnLoadedFile()
+        {
+            FileSave.IsEnabled = false;
+            FileSaveAs.IsEnabled = false;
+
+            SB_MediaControl.IsEnabled = false;
+            SB_AlterNote.IsEnabled = false;
+        }
+
+        private void UIStatus_LoadingFileFromRecord()
+        {
+            FileNew.IsEnabled = false;
+            FileOpen.IsEnabled = false;
+        }
+
+        private void UIStatus_LoadedFile()
+        {
+            FileNew.IsEnabled = true;
+            FileOpen.IsEnabled = true;
+            FileSave.IsEnabled = true;
+            FileSaveAs.IsEnabled = true;
+
+            SB_MediaControl.IsEnabled = true;
+            SB_AlterNote.IsEnabled = true;
+        }
+        #endregion
+
         #region 菜单
         private bool flagLoading = true;
+
+        private void File_New(object sender, RoutedEventArgs e)
+        {
+            Window recorder = Recorder.GetInstance();
+            recorder.Owner = this.Owner;
+            this.WindowState = WindowState.Minimized;
+            recorder.Show();
+        }
 
         private void File_Open(object sender, RoutedEventArgs e)
         {
@@ -83,17 +119,33 @@ namespace StepRecorder.Windows
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                ProjectFile pf = new(openFileDialog.FileName);
-                DataContext = pf;
+                projectFile = new(openFileDialog.FileName);
+                UIStatus_LoadedFile();
 
-                SB_MediaControl.IsEnabled = true;
-                SB_AlterNote.IsEnabled = true;
                 ShortNote.Text = string.Empty;
                 DetailNote.Text = string.Empty;
-                OperateInfo.ItemsSource = pf.GetKeyframeInfo();
-                FrameAt(pf.CurrentFrameIndex);
+                OperateInfo.ItemsSource = projectFile.GetKeyframeInfo();
+                FrameAt(projectFile.CurrentFrameIndex);
             }
             flagLoading = false;
+        }
+
+        private void File_Save(object sender, RoutedEventArgs e) => projectFile!.Save();
+
+        private void File_SaveAs(object sender, RoutedEventArgs e)
+        {
+            // COPY_SaveFile
+            var saveFileDialog = new SaveFileDialog
+            {
+                Title = (string)Application.Current.Resources["S.Share.SaveFileDialog.Title"],
+                DefaultDirectory = SavePath.DefaultOutputDirectory,
+                DefaultExt = ".strcd",
+                FileName = projectFile!.Path[(projectFile.Path.LastIndexOf('\\') + 1)..],
+                Filter = $"{(string)Application.Current.Resources["S.Share.FileDialog.Filter.STRCD"]} (*.strcd)|*.strcd|{(string)Application.Current.Resources["S.Share.FileDialog.Filter.All"]} (*.*)|*.*"
+            };
+            // endCOPY_SaveFile
+            if (saveFileDialog.ShowDialog() == true)
+                projectFile.Save(saveFileDialog.FileName);
         }
         #endregion
 
@@ -125,7 +177,7 @@ namespace StepRecorder.Windows
         {
             if (OperateInfo.SelectedIndex == -1)
                 return;
-            if (((ProjectFile)DataContext).CurrentFrameIndex == ((KeyframeInfo)OperateInfo.SelectedItem).FrameIndex || flagLoading)
+            if (projectFile!.CurrentFrameIndex == ((KeyframeInfo)OperateInfo.SelectedItem).FrameIndex || flagLoading)
             {
                 ShortNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).ShortNote;
                 DetailNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote;
@@ -188,10 +240,9 @@ namespace StepRecorder.Windows
 
         private void FrameAt(int frameIndex)
         {
-            ProjectFile pf = (ProjectFile)DataContext;
-            Screen.Source = pf.FrameAt(frameIndex);
-            int cfi = pf.CurrentFrameIndex;
-            int fc = pf.FrameCount - 1;
+            Screen.Source = projectFile!.FrameAt(frameIndex);
+            int cfi = projectFile.CurrentFrameIndex;
+            int fc = projectFile.FrameCount - 1;
             SB_Progress.Value = (double)cfi / fc;
             SB_CurrentStatus.Text = $"{cfi}/{fc}";
         }
@@ -199,12 +250,11 @@ namespace StepRecorder.Windows
         private void FrameNext()
         {
             flagJumpFrame = false;
-            ProjectFile pf = (ProjectFile)DataContext;
-            int cfi = pf.CurrentFrameIndex + 1;
+            int cfi = projectFile!.CurrentFrameIndex + 1;
             if (OperateInfo.SelectedIndex + 1 < OperateInfo.Items.Count && ((KeyframeInfo)OperateInfo.Items[OperateInfo.SelectedIndex + 1]).FrameIndex == cfi)
                 ++OperateInfo.SelectedIndex;
             FrameAt(cfi);
-            if (pf.CurrentFrameIndex == pf.FrameCount - 1)
+            if (projectFile.CurrentFrameIndex == projectFile.FrameCount - 1)
                 timer.Stop();
             NoteFlush();
             flagJumpFrame = true;
@@ -217,7 +267,7 @@ namespace StepRecorder.Windows
         private void PreviousFrame_Click(object sender, RoutedEventArgs e)
         {
             flagJumpFrame = false;
-            int cfi = ((ProjectFile)DataContext).CurrentFrameIndex - 1;
+            int cfi = projectFile!.CurrentFrameIndex - 1;
             if (OperateInfo.SelectedIndex - 1 > 0 && ((KeyframeInfo)OperateInfo.Items[OperateInfo.SelectedIndex - 1]).FrameIndex == cfi)
                 --OperateInfo.SelectedIndex;
             FrameAt(cfi);       // 如果有需要，请调整解码器（GifDecoder.cs），使其保留两个向后的缓存
@@ -245,7 +295,7 @@ namespace StepRecorder.Windows
             flagJumpFrame = false;
             timer.Stop();
             OperateInfo.SelectedIndex = OperateInfo.Items.Count - 1;
-            FrameAt(((ProjectFile)DataContext).FrameCount);
+            FrameAt(projectFile!.FrameCount);
             flagJumpFrame = true;
         }
         #endregion

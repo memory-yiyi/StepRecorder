@@ -14,11 +14,11 @@
         </Grid.RowDefinitions>
 
         <Menu FontSize="20">
-            <MenuItem Name="File" Header="{DynamicResource S.Editor.Menu.File}">
-                <MenuItem Header="{DynamicResource S.Editor.Menu.File.New}"/>
-                <MenuItem Header="{DynamicResource S.Editor.Menu.File.Open}" Click="File_Open"/>
-                <MenuItem Header="{DynamicResource S.Editor.Menu.File.Save}"/>
-                <MenuItem Header="{DynamicResource S.Editor.Menu.File.SaveAs}"/>
+            <MenuItem Header="{DynamicResource S.Editor.Menu.File}">
+                <MenuItem Name="FileNew" Header="{DynamicResource S.Editor.Menu.File.New}" Click="File_New"/>
+                <MenuItem Name="FileOpen" Header="{DynamicResource S.Editor.Menu.File.Open}" Click="File_Open"/>
+                <MenuItem Name="FileSave" Header="{DynamicResource S.Editor.Menu.File.Save}" Click="File_Save"/>
+                <MenuItem Name="FileSaveAs" Header="{DynamicResource S.Editor.Menu.File.SaveAs}" Click="File_SaveAs"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource S.Editor.Menu.Edit}">
                 <MenuItem Header="{DynamicResource S.Editor.Menu.Edit.Undo}"/>
@@ -105,7 +105,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <UniformGrid Name="SB_MediaControl" Rows="1" Grid.Column="1" IsEnabled="False">
+                <UniformGrid Name="SB_MediaControl" Rows="1" Grid.Column="1">
                     <Button Name="PreviousKeyframe" Content="▲" Style="{DynamicResource T.StatusButton}" Click="PreviousKeyframe_Click"/>
                     <Button Name="PreviousFrame" Content="◀" Style="{DynamicResource T.StatusButton}" Click="PreviousFrame_Click"/>
                     <Button Name="Play" Content="▷" Style="{DynamicResource T.StatusButton}" Click="Play_Click"/>
@@ -133,7 +133,7 @@
             </Grid>
 
             <UniformGrid Rows="1" Grid.Column="1">
-                <UniformGrid Name="SB_AlterNote" Rows="1" IsEnabled="False">
+                <UniformGrid Name="SB_AlterNote" Rows="1">
                     <Button Name="Add" Content="+" Style="{DynamicResource T.StatusButton}"/>
                     <Button Name="Delete" Content="-" Style="{DynamicResource T.StatusButton}"/>
                 </UniformGrid>

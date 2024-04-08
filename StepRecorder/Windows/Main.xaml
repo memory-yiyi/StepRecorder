@@ -6,7 +6,7 @@
         xmlns:ViewModel="clr-namespace:StepRecorder.ViewModel" x:Class="StepRecorder.Windows.Main"
         mc:Ignorable="d"
         Title="{DynamicResource S.Main.Title}" Height="{StaticResource D.Main.Height}" Width="{StaticResource D.Main.Width}"
-        ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
+        ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Loaded="Window_Loaded">
     <Window.DataContext>
         <ViewModel:ApplicationViewModel/>
     </Window.DataContext>

@@ -38,14 +38,20 @@ namespace StepRecorder.Core.Components
             Load(flagXML: false);
         }
 
-        public void Save()
+        public void Save(string? savePath = null)
         {
+            savePath ??= Path;
             // COPY_XmlSerialize(1)
             using MemoryStream mStream = new();
             new XmlSerializer(typeof(KeyframesInfo)).Serialize(mStream, keyframes);
             mStream.Position = 0;
             // endCOPY_XmlSerialize
+            gifMemoryStream.Position = 0;
 
+            using FileStream fStream = new(savePath, FileMode.Create, FileAccess.Write);
+            using TarWriter tarWriter = new(fStream, TarEntryFormat.Gnu);
+            tarWriter.WriteEntry(new GnuTarEntry(TarEntryType.RegularFile, SavePath.TarEntryNameOfXML) { DataStream = mStream });
+            tarWriter.WriteEntry(new GnuTarEntry(TarEntryType.RegularFile, SavePath.TarEntryNameOfGIF) { DataStream = gifMemoryStream });
         }
 
         internal void SerializeKeyframesToFile()
