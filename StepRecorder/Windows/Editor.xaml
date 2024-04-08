@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
 
         <Menu FontSize="20">
-            <MenuItem Header="{DynamicResource S.Editor.Menu.File}">
+            <MenuItem Name="File" Header="{DynamicResource S.Editor.Menu.File}">
                 <MenuItem Header="{DynamicResource S.Editor.Menu.File.New}"/>
                 <MenuItem Header="{DynamicResource S.Editor.Menu.File.Open}" Click="File_Open"/>
                 <MenuItem Header="{DynamicResource S.Editor.Menu.File.Save}"/>

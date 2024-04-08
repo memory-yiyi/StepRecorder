@@ -22,10 +22,12 @@ namespace StepRecorder.Windows
         {
             if (Owner is Recorder recorder)
             {
+                flagLoading = true;
+                File.IsEnabled = false;
+                DataContext = recorder.GetProjectFile();
+                OperateInfo.ItemsSource = ((ProjectFile)DataContext).GetKeyframeInfo();
                 Task.Run(() =>
                 {
-                    this.Dispatcher.Invoke(() => DataContext = recorder.GetProjectFile());
-
                     while (true)
                     {
                         SB_Progress.Dispatcher.Invoke(() => SB_Progress.Value = recorder.GetSaveProgress());
@@ -42,7 +44,19 @@ namespace StepRecorder.Windows
                         owner.Close();
                     });
 
-                    SB_CurrentStatus.Dispatcher.Invoke(() => SB_CurrentStatus.Text = "保存完成");
+                    SB_CurrentStatus.Dispatcher.Invoke(() => SB_CurrentStatus.Text = "保存完成，3s 后自动跳转");
+
+                    Thread.Sleep(3000);
+
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        ProjectFile pf = (ProjectFile)DataContext;
+                        SB_MediaControl.IsEnabled = true;
+                        SB_AlterNote.IsEnabled = true;
+                        FrameAt(((ProjectFile)DataContext).CurrentFrameIndex);
+                        File.IsEnabled = true;
+                        flagLoading = false;
+                    });
                 });
             }
         }
@@ -90,16 +104,14 @@ namespace StepRecorder.Windows
 
         private void OperateInfo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (flagLoading)
-                return;
-
             if (flagJumpFrame)
             {
                 if (OperateInfo.SelectedItem is KeyframeInfo kfi)
                 {
                     ShortNote.Text = kfi.ShortNote;
                     DetailNote.Text = kfi.DetailNote;
-                    FrameAt(kfi.FrameIndex);
+                    if (!flagLoading)
+                        FrameAt(kfi.FrameIndex);
                 }
                 else
                 {
@@ -113,11 +125,11 @@ namespace StepRecorder.Windows
         {
             if (OperateInfo.SelectedIndex == -1)
                 return;
-            if (((ProjectFile)DataContext).CurrentFrameIndex == ((KeyframeInfo)OperateInfo.SelectedItem).FrameIndex)
+            if (((ProjectFile)DataContext).CurrentFrameIndex == ((KeyframeInfo)OperateInfo.SelectedItem).FrameIndex || flagLoading)
             {
                 ShortNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).ShortNote;
                 DetailNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote;
-                if (flagNoteFocus)
+                if (flagNoteFocus || flagLoading)
                 {
                     flagShortNote = false;
                     flagDetailNote = false;
