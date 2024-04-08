@@ -13,10 +13,7 @@ namespace StepRecorder.Core.Components
     /// <param name="keyframes">关键帧集合</param>
     public class ProjectFile(string path, KeyframesInfo keyframes) : IDisposable
     {
-        public ProjectFile(string path) : this(path, [])
-        {
-            Load();
-        }
+        public ProjectFile(string path) : this(path, []) => Load();
 
         #region 保存
         public string Path { get; init; } = path;
@@ -95,15 +92,36 @@ namespace StepRecorder.Core.Components
         #endregion
 
         #region 关键帧
-        public int CurrentKeyframeIndex { get; private set; } = -1;
+        public int CurrentKeyframeIndex { get; set; } = -1;
 
         public IEnumerable<KeyframeInfo> GetKeyframeInfo()
         {
             foreach (KeyframeInfo info in keyframes)
-            {
-                CurrentKeyframeIndex = info.Index - 1;
                 yield return info;
-            }
+        }
+
+        public bool AddKeyframe(string? shortNote = null, string? detailNote = null)
+        {
+            int ckfi = keyframes[CurrentKeyframeIndex].FrameIndex;
+            if (CurrentFrameIndex == ckfi || CurrentKeyframeIndex == -1)
+                return false;
+
+            if (CurrentFrameIndex > ckfi)
+                ++CurrentKeyframeIndex;
+            keyframes.Insert(CurrentKeyframeIndex, new KeyframeInfo(++CurrentKeyframeIndex, CurrentFrameIndex, "&AddNote", shortNote, detailNote, true));
+            for (int i = CurrentKeyframeIndex--; i < keyframes.Count; ++i)
+                ++keyframes[i].Index;
+            return true;
+        }
+
+        public void RemoveKeyframe()
+        {
+            if (keyframes.Count == 0 || CurrentKeyframeIndex == -1)
+                return;
+
+            keyframes.RemoveAt(CurrentKeyframeIndex);
+            for (int i = CurrentKeyframeIndex--; i < keyframes.Count; ++i)
+                --keyframes[i].Index;
         }
         #endregion
 

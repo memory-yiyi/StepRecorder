@@ -134,8 +134,8 @@
 
             <UniformGrid Rows="1" Grid.Column="1">
                 <UniformGrid Name="SB_AlterNote" Rows="1">
-                    <Button Name="Add" Content="+" Style="{DynamicResource T.StatusButton}"/>
-                    <Button Name="Delete" Content="-" Style="{DynamicResource T.StatusButton}"/>
+                    <Button Name="Add" Content="+" Style="{DynamicResource T.StatusButton}" Click="Add_Click"/>
+                    <Button Name="Remove" Content="-" Style="{DynamicResource T.StatusButton}" Click="Remove_Click"/>
                 </UniformGrid>
                 <UniformGrid Name="SB_UpdateNote" Rows="1" Visibility="Hidden"
                              GotFocus="SB_UpdateNote_GotFocus">

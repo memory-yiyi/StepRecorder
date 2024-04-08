@@ -156,6 +156,8 @@ namespace StepRecorder.Windows
 
         private void OperateInfo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            projectFile!.CurrentKeyframeIndex = OperateInfo.SelectedIndex;      // 临时使用
+
             if (flagJumpFrame)
             {
                 if (OperateInfo.SelectedItem is KeyframeInfo kfi)
@@ -232,6 +234,25 @@ namespace StepRecorder.Windows
                 flagDetailNote = false;
             }
             SB_UpdateNote.Visibility = Visibility.Hidden;
+        }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            if (!projectFile!.AddKeyframe(ShortNote.Text, DetailNote.Text))
+                MessageBox.Show("添加失败：不可以对已有关键帧添加注释", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            int i = projectFile.CurrentKeyframeIndex;       // 临时使用
+            OperateInfo.ItemsSource = projectFile!.GetKeyframeInfo();       // 临时使用
+            OperateInfo.SelectedIndex = i;       // 临时使用
+        }
+
+        private void Remove_Click(object sender, RoutedEventArgs e)
+        {
+            projectFile!.RemoveKeyframe();
+
+            int i = projectFile.CurrentKeyframeIndex;       // 临时使用
+            OperateInfo.ItemsSource = projectFile!.GetKeyframeInfo();       // 临时使用
+            OperateInfo.SelectedIndex = i;       // 临时使用
         }
         #endregion
 
