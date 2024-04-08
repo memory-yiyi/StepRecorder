@@ -28,9 +28,9 @@ namespace StepRecorder.Windows
 
                     while (true)
                     {
-                        Progress.Dispatcher.Invoke(() => Progress.Value = recorder.GetSaveProgress());
-                        CurrentStatus.Dispatcher.Invoke(() => CurrentStatus.Text = $"正在保存...{Progress.Value:P1}");
-                        if (Progress.Dispatcher.Invoke(() => Progress.Value == 1d))
+                        SB_Progress.Dispatcher.Invoke(() => SB_Progress.Value = recorder.GetSaveProgress());
+                        SB_CurrentStatus.Dispatcher.Invoke(() => SB_CurrentStatus.Text = $"正在保存...{SB_Progress.Value:P1}");
+                        if (SB_Progress.Dispatcher.Invoke(() => SB_Progress.Value == 1d))
                             break;
                         Thread.Sleep(1000);     // 检测间隔
                     }
@@ -42,14 +42,14 @@ namespace StepRecorder.Windows
                         owner.Close();
                     });
 
-                    CurrentStatus.Dispatcher.Invoke(() => CurrentStatus.Text = "保存完成");
+                    SB_CurrentStatus.Dispatcher.Invoke(() => SB_CurrentStatus.Text = "保存完成");
                 });
             }
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            ((ProjectFile)DataContext).Dispose();
+            ((ProjectFile)DataContext)?.Dispose();
             this.TryShowOwner();
             GC.Collect();
         }
@@ -72,8 +72,10 @@ namespace StepRecorder.Windows
                 ProjectFile pf = new(openFileDialog.FileName);
                 DataContext = pf;
 
-                StatusBar.IsEnabled = true;
-                Media.IsEnabled = true;
+                SB_MediaControl.IsEnabled = true;
+                SB_AlterNote.IsEnabled = true;
+                ShortNote.Text = string.Empty;
+                DetailNote.Text = string.Empty;
                 OperateInfo.ItemsSource = pf.GetKeyframeInfo();
                 FrameAt(pf.CurrentFrameIndex);
             }
@@ -91,42 +93,51 @@ namespace StepRecorder.Windows
             if (flagLoading)
                 return;
 
-            Note_LostFocus();
-
-            if (OperateInfo.SelectedItem is KeyframeInfo kfi)
-            {
-            ShortNote.Text = kfi.ShortNote;
-            DetailNote.Text = kfi.DetailNote;
-
             if (flagJumpFrame)
-                FrameAt(kfi.FrameIndex);
-        }
-            else
             {
-                ShortNote.Text = string.Empty;
-                DetailNote.Text = string.Empty;
+                if (OperateInfo.SelectedItem is KeyframeInfo kfi)
+                {
+                    ShortNote.Text = kfi.ShortNote;
+                    DetailNote.Text = kfi.DetailNote;
+                    FrameAt(kfi.FrameIndex);
+                }
+                else
+                {
+                    ShortNote.Text = string.Empty;
+                    DetailNote.Text = string.Empty;
+                }
             }
         }
 
-        private void Note_GotFocus() => UpdateNote.IsEnabled = true;
-
-        private void Note_LostFocus()
+        private void NoteFlush(bool flagNoteFocus = false)
         {
-            UpdateNote.IsEnabled = false;
-            flagShortNote = false;
-            flagDetailNote = false;
+            if (OperateInfo.SelectedIndex == -1)
+                return;
+            if (((ProjectFile)DataContext).CurrentFrameIndex == ((KeyframeInfo)OperateInfo.SelectedItem).FrameIndex)
+            {
+                ShortNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).ShortNote;
+                DetailNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote;
+                if (flagNoteFocus)
+                {
+                    flagShortNote = false;
+                    flagDetailNote = false;
+                    SB_UpdateNote.Visibility = Visibility.Visible;
+                }
+            }
         }
 
-        private void ShortNote_GotFocus(object sender, RoutedEventArgs e)
-        {
-            Note_GotFocus();
-            flagShortNote = true;
-        }
+        private void Note_GotFocus(object sender, RoutedEventArgs e) => NoteFlush(true);
 
-        private void DetailNote_GotFocus(object sender, RoutedEventArgs e)
+        private void ShortNote_TextChanged(object sender, TextChangedEventArgs e) => flagShortNote = true;
+
+        private void DetailNote_TextChanged(object sender, TextChangedEventArgs e) => flagDetailNote = true;
+
+        private void Note_LostFocus(object sender, RoutedEventArgs e) => SB_UpdateNote.Visibility = Visibility.Hidden;
+
+        private void SB_UpdateNote_GotFocus(object sender, RoutedEventArgs e)
         {
-            Note_GotFocus();
-            flagDetailNote = true;
+            if (flagShortNote || flagDetailNote)
+                SB_UpdateNote.Visibility = Visibility.Visible;
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
@@ -141,6 +152,7 @@ namespace StepRecorder.Windows
                 ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote = DetailNote.Text;
                 flagDetailNote = false;
             }
+            SB_UpdateNote.Visibility = Visibility.Hidden;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -155,6 +167,7 @@ namespace StepRecorder.Windows
                 DetailNote.Text = ((KeyframeInfo)OperateInfo.SelectedItem).DetailNote;
                 flagDetailNote = false;
             }
+            SB_UpdateNote.Visibility = Visibility.Hidden;
         }
         #endregion
 
@@ -167,8 +180,8 @@ namespace StepRecorder.Windows
             Screen.Source = pf.FrameAt(frameIndex);
             int cfi = pf.CurrentFrameIndex;
             int fc = pf.FrameCount - 1;
-            Progress.Value = (double)cfi / fc;
-            CurrentStatus.Text = $"{cfi}/{fc}";
+            SB_Progress.Value = (double)cfi / fc;
+            SB_CurrentStatus.Text = $"{cfi}/{fc}";
         }
 
         private void FrameNext()
@@ -181,6 +194,7 @@ namespace StepRecorder.Windows
             FrameAt(cfi);
             if (pf.CurrentFrameIndex == pf.FrameCount - 1)
                 timer.Stop();
+            NoteFlush();
             flagJumpFrame = true;
         }
 
@@ -190,10 +204,13 @@ namespace StepRecorder.Windows
 
         private void PreviousFrame_Click(object sender, RoutedEventArgs e)
         {
+            flagJumpFrame = false;
             int cfi = ((ProjectFile)DataContext).CurrentFrameIndex - 1;
             if (OperateInfo.SelectedIndex - 1 > 0 && ((KeyframeInfo)OperateInfo.Items[OperateInfo.SelectedIndex - 1]).FrameIndex == cfi)
                 --OperateInfo.SelectedIndex;
             FrameAt(cfi);       // 如果有需要，请调整解码器（GifDecoder.cs），使其保留两个向后的缓存
+            NoteFlush();
+            flagJumpFrame = true;
         }
 
         private void NextFrame_Click(object sender, RoutedEventArgs e) => FrameNext();

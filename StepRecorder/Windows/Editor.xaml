@@ -74,7 +74,7 @@
 
                         <TextBlock Text="{DynamicResource S.Editor.Context.Note.Short}" Style="{DynamicResource T.NoteTitle}"/>
                         <TextBox Name="ShortNote" Grid.Row="1" Style="{DynamicResource T.NoteContext}"
-                                 GotFocus="ShortNote_GotFocus"/>
+                                 GotFocus="Note_GotFocus"  TextChanged="ShortNote_TextChanged" LostFocus="Note_LostFocus"/>
                     </Grid>
                     <Grid>
                         <Grid.RowDefinitions>
@@ -84,13 +84,13 @@
 
                         <TextBlock Text="{DynamicResource S.Editor.Context.Note.Detail}" Style="{DynamicResource T.NoteTitle}"/>
                         <TextBox Name="DetailNote" Grid.Row="1" Style="{DynamicResource T.NoteContext}"
-                                 GotFocus="DetailNote_GotFocus"/>
+                                 GotFocus="Note_GotFocus" TextChanged="DetailNote_TextChanged" LostFocus="Note_LostFocus"/>
                     </Grid>
                 </UniformGrid>
             </Grid>
         </Grid>
 
-        <Grid Name="StatusBar" Grid.Row="2" Background="#FFF1EDED" IsEnabled="False">
+        <Grid Grid.Row="2" Background="#FFF1EDED">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="11*"/>
                 <ColumnDefinition Width="3*"/>
@@ -105,7 +105,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <UniformGrid Name="Media" Rows="1" Grid.Column="1" IsEnabled="False">
+                <UniformGrid Name="SB_MediaControl" Rows="1" Grid.Column="1" IsEnabled="False">
                     <Button Name="PreviousKeyframe" Content="▲" Style="{DynamicResource T.StatusButton}" Click="PreviousKeyframe_Click"/>
                     <Button Name="PreviousFrame" Content="◀" Style="{DynamicResource T.StatusButton}" Click="PreviousFrame_Click"/>
                     <Button Name="Play" Content="▷" Style="{DynamicResource T.StatusButton}" Click="Play_Click"/>
@@ -125,19 +125,20 @@
                     <Button Name="NextKeyframe" Content="▼" Style="{DynamicResource T.StatusButton}" Click="NextKeyframe_Click"/>
                 </UniformGrid>
 
-                <ProgressBar Name="Progress" Height="{Binding ElementName=Play,Path=Height}"
+                <ProgressBar Name="SB_Progress" Height="{Binding ElementName=Play,Path=Height}"
                              Maximum="1" LargeChange="0.1" SmallChange="0.01" Grid.Column="3"/>
 
-                <TextBlock Name="CurrentStatus" Text="{DynamicResource S.Editor.Context.InitTip}" FontSize="20"
+                <TextBlock Name="SB_CurrentStatus" Text="{DynamicResource S.Editor.Context.InitTip}" FontSize="20"
                            Grid.Column="4" VerticalAlignment="Center" Margin="8,0,0,0"/>
             </Grid>
 
             <UniformGrid Rows="1" Grid.Column="1">
-                <UniformGrid Rows="1">
+                <UniformGrid Name="SB_AlterNote" Rows="1" IsEnabled="False">
                     <Button Name="Add" Content="+" Style="{DynamicResource T.StatusButton}"/>
                     <Button Name="Delete" Content="-" Style="{DynamicResource T.StatusButton}"/>
                 </UniformGrid>
-                <UniformGrid Name="UpdateNote" Rows="1" IsEnabled="False">
+                <UniformGrid Name="SB_UpdateNote" Rows="1" Visibility="Hidden"
+                             GotFocus="SB_UpdateNote_GotFocus">
                     <Button Name="Ok" Content="✓" Style="{DynamicResource T.StatusButton}" Click="Ok_Click"/>
                     <Button Name="Cancel" Content="✕" Style="{DynamicResource T.StatusButton}" Click="Cancel_Click"/>
                 </UniformGrid>
