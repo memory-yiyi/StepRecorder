@@ -134,7 +134,6 @@ namespace StepRecorder.Core.Components
                     {
                         if (recordTool!.GetCurrentMergeCount() == recordTool.GetCurrentFrameCount())
                         {
-                            Thread.Sleep(1000);     // 给 RecordTool 关闭文件的时间
                             ProjectFile!.SaveFromRecord();
                             break;
                         }

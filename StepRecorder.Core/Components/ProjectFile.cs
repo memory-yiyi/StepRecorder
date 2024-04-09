@@ -29,7 +29,16 @@ namespace StepRecorder.Core.Components
             {
                 using TarWriter tarWriter = new(fStream, TarEntryFormat.Gnu);
                 tarWriter.WriteEntry(new GnuTarEntry(TarEntryType.RegularFile, SavePath.TarEntryNameOfXML) { DataStream = mStream });
-                tarWriter.WriteEntry(SavePath.TempPathOfGIF, SavePath.TarEntryNameOfGIF);
+                while (true)
+                {
+                    try
+                    {
+                        tarWriter.WriteEntry(SavePath.TempPathOfGIF, SavePath.TarEntryNameOfGIF);
+                    }
+                    catch (IOException) { }
+                    Thread.Sleep(1000);
+                    break;
+                }
             }
 
             Load(flagXML: false);

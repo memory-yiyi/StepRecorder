@@ -4,10 +4,30 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="{DynamicResource S.Settings.Title}" Height="450" Width="800"
+        Title="{DynamicResource S.Settings.Title}" Height="300" Width="785"
         ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner"
         Closed="Window_Closed">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="关于 - Step Recorder" FontSize="24" Margin="10"/>
+        <UniformGrid Columns="1" Grid.Row="1">
+            <UniformGrid.Style>
+                <Style>
+                    <Setter Property="TextBlock.Margin" Value="12 5 0 5"/>
+                    <Setter Property="TextBlock.FontSize" Value="16"/>
+                </Style>
+            </UniformGrid.Style>
+
+            <TextBlock Text="版本 0.0.1-alpha"/>
+            <TextBlock Text="作者 依伊"/>
+            <TextBlock Text="非常感谢" FontSize="20"/>
+            <TextBlock Text="Visual Studio"/>
+            <TextBlock Text="Gifski"/>
+            <TextBlock Text="所有开发者和贡献者以及提供反馈和捐助的人"/>
+        </UniformGrid>
     </Grid>
 </Window>

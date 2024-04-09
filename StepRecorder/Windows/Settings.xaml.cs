@@ -1,9 +1,10 @@
-﻿using System.Windows;
+﻿using StepRecorder.Extensions;
+using System.Windows;
 
 namespace StepRecorder.Windows
 {
     /// <summary>
-    /// Settings.xaml 的交互逻辑
+    /// 设置
     /// </summary>
     public partial class Settings : Window
     {
@@ -14,7 +15,7 @@ namespace StepRecorder.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            this.Owner?.Show();
+            this.TryShowOwner();
         }
     }
 }
