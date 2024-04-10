@@ -122,13 +122,14 @@ namespace StepRecorder.Core.Components
         public delegate string? GetSaveInfoDelegate();
 
         public ProjectFile? ProjectFile { get; private set; }
+        public Task? SaveTask { get; private set; }
 
         private void Save()
         {
             if (getSaveInfo() is string savePath)
             {
                 ProjectFile = new ProjectFile(savePath, SaveKeyframes());
-                Task.Run(() =>
+                SaveTask = Task.Run(() =>
                 {
                     while (true)
                     {

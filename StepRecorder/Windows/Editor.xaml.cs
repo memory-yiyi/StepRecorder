@@ -40,16 +40,15 @@ namespace StepRecorder.Windows
                         Thread.Sleep(1000);     // 检测间隔
                     }
 
+                    SB_CurrentStatus.Dispatcher.Invoke(() => SB_CurrentStatus.Text = "保存完成，请等待文件加载");
+                    recorder.GetSaveTask().Wait();
+
                     this.Dispatcher.Invoke(() =>
                     {
                         Window owner = Owner;
                         Owner = owner.Owner;
                         owner.Close();
                     });
-
-                    SB_CurrentStatus.Dispatcher.Invoke(() => SB_CurrentStatus.Text = "保存完成，3s 后自动跳转");
-
-                    Thread.Sleep(3000);
 
                     this.Dispatcher.Invoke(() =>
                     {

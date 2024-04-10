@@ -34,10 +34,12 @@ namespace StepRecorder.Core.Components
                     try
                     {
                         tarWriter.WriteEntry(SavePath.TempPathOfGIF, SavePath.TarEntryNameOfGIF);
+                        break;
                     }
-                    catch (IOException) { }
-                    Thread.Sleep(1000);
-                    break;
+                    catch (IOException)
+                    {
+                        Thread.Sleep(1000);
+                    }
                 }
             }
 

@@ -201,6 +201,7 @@ namespace StepRecorder.Windows
         }
 
         internal ProjectFile GetProjectFile() => recordState.ProjectFile!;
+        internal Task GetSaveTask() => recordState.SaveTask!;
         internal double GetSaveProgress() => recordState.GetSaveProgress();
         #endregion
 
