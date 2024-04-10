@@ -52,11 +52,25 @@
                         <TextBlock Name="Operation" Text="{DynamicResource S.Editor.Context.Operation}" Width="200"/>
                     </StackPanel>
 
-                    <ListBox Name="OperateInfo" Grid.Row="1" SelectionChanged="OperateInfo_SelectionChanged">
+                    <ListBox Name="OperateInfo" Grid.Row="1" SelectionChanged="OperateInfo_SelectionChanged" MouseRightButtonUp="OperateInfo_MouseRightButtonUp">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Style="{DynamicResource T.KeyframeListContext}">
-                                    <TextBlock Text="{Binding Path=Index}" Width="{Binding ElementName=Index,Path=Width}"/>
+                                    <TextBlock Text="{Binding Path=Index}" Width="{Binding ElementName=Index,Path=Width}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=IsKey}" Value="false">
+                                                        <Setter Property="Background" Value="Orange"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Path=IsKey}" Value="true">
+                                                        <Setter Property="Background" Value="Red"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                     <TextBlock Text="{Binding Path=FrameIndex}" Width="{Binding ElementName=FrameIndex,Path=Width}"/>
                                     <TextBlock Text="{Binding Path=InputContent}" Width="{Binding ElementName=Operation,Path=Width}"/>
                                 </StackPanel>

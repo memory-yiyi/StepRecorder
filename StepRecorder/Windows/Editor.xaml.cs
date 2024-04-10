@@ -174,6 +174,21 @@ namespace StepRecorder.Windows
             }
         }
 
+        private void OperateInfo_MouseRightButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            KeyframeInfo ki = (KeyframeInfo)OperateInfo.SelectedItem;
+            if (ki.IsKey == null)
+                ki.IsKey = false;
+            else if (ki.IsKey == false)
+                ki.IsKey = true;
+            else
+                ki.IsKey = null;
+
+            int i = projectFile!.CurrentKeyframeIndex;       // 临时使用
+            OperateInfo.ItemsSource = projectFile!.GetKeyframeInfo();       // 临时使用
+            OperateInfo.SelectedIndex = i;       // 临时使用
+        }
+
         private void NoteFlush(bool flagNoteFocus = false)
         {
             if (OperateInfo.SelectedIndex == -1)
