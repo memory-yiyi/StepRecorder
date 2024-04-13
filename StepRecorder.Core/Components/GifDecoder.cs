@@ -85,17 +85,26 @@ namespace StepRecorder.Core.Components
         private int baseFrameIndex;
         private int currentCacheIndex;
         private readonly List<FramesCache> framesCache;
+        private readonly List<int> frameMap;
         #endregion
 
         #region 属性
         public int Width { get => image.Width; }
         public int Height { get => image.Height; }
-        public int FrameCount { get => image.GetFrameCount(frameDimension); }
+        public int RealFrameCount { get => image.GetFrameCount(frameDimension); }
+        public int FrameCount { get => frameMap.Last(); }
+        /*
+         * 对于时间间隔如果有需要，请调整录制工具（RecordTool.cs）并进行调用
+         * 如果开发到可以选择帧率，还需调整工程文件（ProjectFile.cs）
+         */
+        public int MSPF { get; } = 125;
         #endregion
 
         #region 构造函数
         private GifDecoder(object obj, int cacheSize = 4, int cacheCount = 6)
         {
+            static int FuzzyQuotient(double x, double y) => (int)Math.Round(x / y);
+
             if (obj is string filePath)
                 image = Image.FromFile(filePath);
             else if (obj is Stream stream)
@@ -103,14 +112,32 @@ namespace StepRecorder.Core.Components
             else
                 throw new InvalidOperationException("传参无效");
 
+            int i, j, k, index;
+            PropertyItem pi;
+            byte[] delayByte = new byte[4];
+
             this.cacheSize = cacheSize;
             this.cacheCount = cacheCount;
             baseFrameIndex = int.MinValue;
             currentCacheIndex = 0;
 
             framesCache = [];
-            for (int i = 0; i < cacheCount; ++i)
+            for (i = 0; i < cacheCount; ++i)
                 framesCache.Add(new FramesCache(image, cacheSize));
+
+            frameMap = [0];
+            for (i = 0; i < RealFrameCount; ++i)
+            {
+                image.SelectActiveFrame(frameDimension, i);
+
+                if ((index = Array.IndexOf(image.PropertyIdList, 0x5100)) != -1)
+                {
+                    pi = image.PropertyItems[index];
+                    for (j = i * 4, k = 0; k < 4; ++j, ++k)
+                        delayByte[k] = pi.Value![j];
+                    frameMap.Add(FuzzyQuotient(BitConverter.ToInt32(delayByte, 0) * 10, MSPF) + frameMap[i]);
+                }
+            }
         }
 
         public GifDecoder(string filePath) : this(filePath as object) { }
@@ -128,6 +155,35 @@ namespace StepRecorder.Core.Components
             }
 
             int GetNewBaseStartIndex(int loopIndex, int baseIndex) => baseFrameIndex + (loopIndex - baseIndex + cacheCount) % cacheCount * cacheSize;
+
+            int BinaryRegionSearch(int x)
+            {
+                if (x < frameMap.First() || x >= frameMap.Last())
+                    return -1;
+
+                int low = 0;
+                int high = frameMap.Count - 1;
+                int mid;
+
+                while (low <= high)
+                {
+                    mid = (low + high) >> 1;
+                    if (x >= frameMap[mid])
+                    {
+                        low = mid + 1;
+                    }
+                    else
+                    {
+                        high = mid - 1;
+                        if (high == -1)
+                            return 0;
+                    }
+                }
+                return high;
+            }
+
+            if ((index = BinaryRegionSearch(index)) == -1)
+                return null;
 
             if (index >= baseFrameIndex && index < baseFrameIndex + cacheSize * cacheCount)
             {
